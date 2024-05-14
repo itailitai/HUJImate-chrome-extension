@@ -7,7 +7,12 @@ document.readyState === "loading"
 function clickEventHandler(e) {
   const parsedUrl = new URL(window.location.href);
 
-  const target = e.target.tagName === "A" ? e.target : e.target.closest("a");
+  const target =
+    e.target.tagName === "A" || e.target.parentElement.tagName === "A"
+      ? e.target.tagName === "A"
+        ? e.target
+        : e.target.parentElement
+      : null;
   if (!target) return;
 
   e.preventDefault();
