@@ -714,3 +714,14 @@ html[lang="he"] .grades-container {
   margin-right: 0px;
   margin-left: 0;
 }
+
+.login_div3 {
+  border: none !important;
+  background: #f4f7fe !important;
+  border-radius: 1em !important;
+  margin: 1em !important;
+}
+
+.login_div3 {
+  margin: 1em !important;
+}
