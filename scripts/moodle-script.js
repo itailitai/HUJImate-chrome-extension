@@ -66,17 +66,22 @@ function fetchAndReplaceContent(url) {
       const newDocument = parser.parseFromString(html, "text/html");
       document.querySelector("#page-content").innerHTML =
         newDocument.querySelector("#page-content").innerHTML;
-
       document.querySelector("#page-navbar").innerHTML =
         newDocument.querySelector("#page-navbar").innerHTML;
-      window.history.pushState({ path: url }, "", url);
+      window.history.pushState(
+        {
+          path: url,
+        },
+        "",
+        url
+      );
       if (activeCSS) {
         const scrollingMenu = createScrollingMenu();
         updateScrollingMenuPosition(scrollingMenu);
-        hideLoadingScreen(250);
+
         replaceImages(document);
       }
-
+      hideLoadingScreen(250);
       document.addEventListener("click", clickEventHandler);
     })
     .catch((error) => {
@@ -148,7 +153,10 @@ async function initMoodle() {
     });
 
     // Start observing the document for changes
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
 
     // Check if the element is already present when the script runs
     onDndSupportedElementFound();
@@ -291,7 +299,10 @@ function showSkeletonLoader(actionFunction) {
     ? (document.querySelector(".scrolling-menu").style.opacity = 0)
     : null;
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
 
   setTimeout(actionFunction, 150);
 }
@@ -325,7 +336,9 @@ function showLoadingScreen(
     document.body.appendChild(loadingScreen);
   }
 
-  chrome.storage.sync.set({ loadingScreen: true });
+  chrome.storage.sync.set({
+    loadingScreen: true,
+  });
 }
 
 // Hides the loading screen after a specified delay
@@ -338,7 +351,9 @@ function hideLoadingScreen(delay) {
         loadingScreen.addEventListener("transitionend", () =>
           loadingScreen.remove()
         );
-        chrome.storage.sync.set({ loadingScreen: false });
+        chrome.storage.sync.set({
+          loadingScreen: false,
+        });
       }
     });
   }, delay);
@@ -536,7 +551,10 @@ function createSubMenu(courseUrl) {
     const subMenuItem = document.createElement("span");
     subMenuItem.textContent = h3.textContent;
     subMenuItem.style.cursor = "pointer";
-    subMenuItem.onclick = () => h3.scrollIntoView({ behavior: "smooth" });
+    subMenuItem.onclick = () =>
+      h3.scrollIntoView({
+        behavior: "smooth",
+      });
     subMenuList.appendChild(subMenuItem);
   });
 
