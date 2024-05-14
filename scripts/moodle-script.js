@@ -91,22 +91,23 @@ function fetchAndReplaceContent(url) {
 }
 
 async function initMoodle() {
-  showLoadingScreen(false, false, true);
-  const moodleCssEnabled = await getStorageValue("moodleCssEnabled");
-  if (moodleCssEnabled !== false) {
-    document.querySelector("html").setAttribute("hujinsight", "true");
-    activeCSS = true;
-  }
-
   const ajaxEnabled = await getStorageValue("ajaxEnabled");
+  const moodleCssEnabled = await getStorageValue("moodleCssEnabled");
   if (ajaxEnabled === false) {
     if (activeCSS) {
       replaceImages(document);
       const scrollingMenu = createScrollingMenu();
       updateScrollingMenuPosition(scrollingMenu);
     }
-    hideLoadingScreen(150);
+
     return; // Return from initMoodle if ajaxEnabled is false
+  }
+
+  showLoadingScreen(false, false, true);
+
+  if (moodleCssEnabled !== false) {
+    document.querySelector("html").setAttribute("hujinsight", "true");
+    activeCSS = true;
   }
 
   hideLoadingScreen(150);
