@@ -746,3 +746,7 @@ html[hujinsight="true"] .columnleft section {
 .toggledsection.sectionopen {
   display: block;
 }
+
+html[hujinsight="true"] #page-wrapper {
+  background: #f4f7fe !important;
+}

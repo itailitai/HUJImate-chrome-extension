@@ -644,7 +644,10 @@ function toggleSection(section) {
     // set aria-expanded to false
     parentElement.setAttribute("aria-expanded", "false");
     sectionContent.classList.remove("sectionopen");
-  } else {
+  } else if (
+    grandParent.classList.contains("toggle_closed") ||
+    !grandParent.classList.contains("toggle_open")
+  ) {
     section.setAttribute("aria-expanded", "true");
     grandParent.classList.remove("toggle_closed");
     grandParent.classList.add("toggle_open");
