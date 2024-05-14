@@ -52,9 +52,10 @@ function fetchAndReplaceContent(url) {
         newDocument.querySelector("body").outerHTML;
       replaceImages(document);
       window.history.pushState({ path: url }, "", url);
-      hideLoadingScreen(250);
+
       const scrollingMenu = createScrollingMenu();
       updateScrollingMenuPosition(scrollingMenu);
+      hideLoadingScreen(250);
       document.addEventListener("click", clickEventHandler);
     })
     .catch((error) => {
@@ -234,8 +235,9 @@ function createLoadingScreenElement() {
 // Displays the skeleton loader and scrolls to the top of the page
 function showSkeletonLoader(actionFunction) {
   createSkeletonLoader();
+  document.querySelector(".scrolling-menu").style.opacity = 0;
   window.scrollTo({ top: 0, behavior: "smooth" });
-  document.querySelector(".scrolling-menu").opacity = "0";
+
   setTimeout(actionFunction, 150);
 }
 
@@ -565,6 +567,9 @@ function removeScrollEventListener() {
 // Updates the position of the scrolling menu based on the current scroll position
 function updateScrollingMenuPosition(scrollingMenu) {
   if (!scrollingMenu) return;
-  scrollingMenu.style.opacity = 1;
+
   scrollingMenu.style.top = `${scrollingMenuTop + 70}px`;
+  setTimeout(() => {
+    document.querySelector(".scrolling-menu").style.opacity = 1;
+  }, 150);
 }
