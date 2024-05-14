@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "HujiInsight Injector",
+  "version": "1.0",
+  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.huji.ac.il/dataj/controller/*"],
+      "js": ["contentScript.js"]
+    },
+    {
+      "matches": ["https://moodle4.cs.huji.ac.il/*"],
+      "js": ["scripts/moodle-script.js"],
+      "run_at": "document_start",
+
+      "css": ["assets/moodle-css.css"]
+    },
+    {
+      "matches": ["https://hujinsight.com/*"],
+      "js": ["scripts/hujinsight.js"]
+    }
+  ],
+
+  "host_permissions": ["https://*.hujinsight.com/*"],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/moodlelogo.png",
+        "assets/loader.gif",
+        "assets/eye_on.png",
+        "assets/eye_off.png"
+      ],
+      "matches": ["https://moodle4.cs.huji.ac.il/*"]
+    }
+  ]
+}
