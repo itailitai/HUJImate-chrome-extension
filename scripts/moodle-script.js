@@ -326,7 +326,7 @@ function hideLoadingScreen(delay) {
   setTimeout(() => {
     const loadingScreen = document.getElementById("loadingScreen");
     chrome.storage.sync.get("loadingScreen", (result) => {
-      if (result.loadingScreen && loadingScreen) {
+      if (result.loadingScreen || loadingScreen) {
         loadingScreen.style.opacity = "0";
         loadingScreen.addEventListener("transitionend", () =>
           loadingScreen.remove()
