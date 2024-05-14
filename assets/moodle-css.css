@@ -50,6 +50,15 @@ html[hujinsight="true"] .page-header-headings {
   visibility: hidden;
 }
 
+html[hujinsight="true"] .page-header-headings img {
+  transition: 0.25s ease all;
+}
+
+html[hujinsight="true"] .page-header-headings img:hover {
+  transform: scale(1.05);
+  margin-left: 1em;
+}
+
 html[hujinsight="true"] .columnright {
   background: #fff !important;
   border-radius: 1.2em;
@@ -749,4 +758,10 @@ html[hujinsight="true"] .columnleft section {
 
 html[hujinsight="true"] #page-wrapper {
   background: #f4f7fe !important;
+}
+
+html[hujinsight="true"] a:not([class]):focus {
+  outline: none !important;
+  background: none !important;
+  box-shadow: none !important;
 }
