@@ -34,9 +34,9 @@ The HUJInsight Chrome Extension is designed to enhance the user experience on th
 
 - **manifest.json**: Defines the extension's properties and permissions.
 - **background.js**: Handles background tasks and listeners.
-- **contentScript.js**: Runs in the context of the HUJInsight webpage to inject custom elements and handle interactions.
+- **contentScript.js**: Runs in the context of the HUJI Personal Information webpage to inject custom button for grade sharing.
 - **popup.js**: Manages the extension's popup UI.
-- **hujinsight.js**: Contains functions to interact with the HUJInsight API.
+- **hujinsight.js**: Contains functions to grab the token when visiting HUJInsight.
 - **moodle-script.js**: Enhances Moodle platform functionality.
 
 ## Usage
