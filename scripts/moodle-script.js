@@ -1,20 +1,35 @@
 let isScrolling = false;
 let scrollingMenuTop = 0;
+let activeCSS = false;
 document.readyState === "loading"
   ? document.addEventListener("DOMContentLoaded", initMoodle)
   : initMoodle();
 
+function getStorageValue(key) {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get([key], function (result) {
+      resolve(result[key]);
+    });
+  });
+}
+
 function clickEventHandler(e) {
   const parsedUrl = new URL(window.location.href);
-
+  console.log("Click event", e.target);
   const target =
     e.target.tagName === "A" || e.target.parentElement.tagName === "A"
       ? e.target.tagName === "A"
         ? e.target
         : e.target.parentElement
       : null;
-  if (!target) return;
-
+  if (!target) {
+    if (e.target.classList.contains("sectionname")) {
+      toggleSection(e.target);
+      return;
+    } else {
+      return;
+    }
+  }
   e.preventDefault();
   const url = target.href;
 
@@ -50,12 +65,14 @@ function fetchAndReplaceContent(url) {
       const newDocument = parser.parseFromString(html, "text/html");
       document.querySelector("body").outerHTML =
         newDocument.querySelector("body").outerHTML;
-      replaceImages(document);
       window.history.pushState({ path: url }, "", url);
+      if (activeCSS) {
+        const scrollingMenu = createScrollingMenu();
+        updateScrollingMenuPosition(scrollingMenu);
+        hideLoadingScreen(250);
+        replaceImages(document);
+      }
 
-      const scrollingMenu = createScrollingMenu();
-      updateScrollingMenuPosition(scrollingMenu);
-      hideLoadingScreen(250);
       document.addEventListener("click", clickEventHandler);
     })
     .catch((error) => {
@@ -64,7 +81,27 @@ function fetchAndReplaceContent(url) {
     });
 }
 
-function initMoodle() {
+async function initMoodle() {
+  showLoadingScreen(false, false, true);
+  const moodleCssEnabled = await getStorageValue("moodleCssEnabled");
+  if (moodleCssEnabled !== false) {
+    document.querySelector("html").setAttribute("hujinsight", "true");
+    activeCSS = true;
+  }
+
+  const ajaxEnabled = await getStorageValue("ajaxEnabled");
+  if (ajaxEnabled === false) {
+    if (activeCSS) {
+      replaceImages(document);
+      const scrollingMenu = createScrollingMenu();
+      updateScrollingMenuPosition(scrollingMenu);
+    }
+    hideLoadingScreen(150);
+    return; // Return from initMoodle if ajaxEnabled is false
+  }
+
+  hideLoadingScreen(150);
+
   const parsedUrl = new URL(window.location.href);
   if (
     parsedUrl.hostname === "moodle4.cs.huji.ac.il" &&
@@ -81,10 +118,12 @@ function initMoodle() {
         document.addEventListener("click", clickEventHandler);
         window.addEventListener("popstate", () => window.location.reload());
 
-        replaceImages(document);
-        const scrollingMenu = createScrollingMenu();
+        if (activeCSS) {
+          replaceImages(document);
+          const scrollingMenu = createScrollingMenu();
+          updateScrollingMenuPosition(scrollingMenu);
+        }
         hideLoadingScreen(250);
-        updateScrollingMenuPosition(scrollingMenu);
       }
     }
 
@@ -112,11 +151,17 @@ function initMoodle() {
   } else {
     document.addEventListener("click", clickEventHandler);
     window.addEventListener("popstate", () => window.location.reload());
-    addFontsToHead();
-    replaceImages(document);
-    const scrollingMenu = createScrollingMenu();
+    chrome.storage.sync.get(["moodleCssEnabled"], function (result) {
+      if (result.moodleCssEnabled !== false) {
+        console.log("Adding CSS");
+        addFontsToHead();
+        replaceImages(document);
+        const scrollingMenu = createScrollingMenu();
+        updateScrollingMenuPosition(scrollingMenu);
+      }
+    });
+
     hideLoadingScreen(250);
-    updateScrollingMenuPosition(scrollingMenu);
   }
 }
 
@@ -235,7 +280,10 @@ function createLoadingScreenElement() {
 // Displays the skeleton loader and scrolls to the top of the page
 function showSkeletonLoader(actionFunction) {
   createSkeletonLoader();
-  document.querySelector(".scrolling-menu").style.opacity = 0;
+  document.querySelector(".scrolling-menu")
+    ? (document.querySelector(".scrolling-menu").style.opacity = 0)
+    : null;
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 
   setTimeout(actionFunction, 150);
@@ -252,8 +300,12 @@ function showDelayedLoadingScreen(loadingScreen, actionFunction) {
 }
 
 // Main function to show either the skeleton loader or loading screen, depending on the presence of course content
-function showLoadingScreen(withDelay = false, actionFunction = null) {
-  if (document.querySelector(".course-content")) {
+function showLoadingScreen(
+  withDelay = false,
+  actionFunction = null,
+  noSkeleton = false
+) {
+  if (document.querySelector(".course-content") && !noSkeleton) {
     showSkeletonLoader(actionFunction);
     return;
   }
@@ -336,7 +388,6 @@ function createScrollingMenu() {
   scrollingMenu.appendChild(hiddenHeaderContainer);
   scrollingMenu.appendChild(hiddenCourseList);
 
-  menuContainer.innerHTML = "<span class='title'></span>";
   menuContainer.appendChild(scrollingMenu);
   adjustScrollingMenuPosition(menuContainer);
 
@@ -432,6 +483,8 @@ function createCourseListItem(
   listItem.appendChild(listContainer);
 
   if (window.location.href.includes(courseUrl)) {
+    console.log(courseUrl);
+    console.log(window.location.href);
     link.classList.add("active");
     const subMenuList = createSubMenu(courseUrl);
     listItem.appendChild(subMenuList);
@@ -572,4 +625,33 @@ function updateScrollingMenuPosition(scrollingMenu) {
   setTimeout(() => {
     document.querySelector(".scrolling-menu").style.opacity = 1;
   }, 150);
+}
+
+function toggleSection(section) {
+  const grandParent = section.parentElement.parentElement;
+  const parentElement = section.parentElement;
+  const sectionNum = section.dataset.number;
+  const sectionContent = document.querySelector(
+    `#toggledsection-${sectionNum}`
+  );
+  console.log(`#toggledsection-${sectionNum}`);
+  if (grandParent.classList.contains("toggle_open")) {
+    section.setAttribute("aria-expanded", "false");
+    grandParent.classList.remove("toggle_open");
+    grandParent.classList.add("toggle_closed");
+    parentElement.classList.remove("toggle_open");
+    parentElement.classList.add("toggle_closed");
+    // set aria-expanded to false
+    parentElement.setAttribute("aria-expanded", "false");
+    sectionContent.classList.remove("sectionopen");
+  } else {
+    section.setAttribute("aria-expanded", "true");
+    grandParent.classList.remove("toggle_closed");
+    grandParent.classList.add("toggle_open");
+    parentElement.classList.remove("toggle_closed");
+    parentElement.classList.add("toggle_open");
+    // set aria-expanded to true
+    parentElement.setAttribute("aria-expanded", "true");
+    sectionContent.classList.add("sectionopen");
+  }
 }
