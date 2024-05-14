@@ -70,10 +70,12 @@ function fetchAndReplaceContent(url) {
       document.querySelector("#page-navbar").innerHTML =
         newDocument.querySelector("#page-navbar").innerHTML;
       window.history.pushState({ path: url }, "", url);
-      replaceImages(document);
-      const scrollingMenu = createScrollingMenu();
-      updateScrollingMenuPosition(scrollingMenu);
-      hideLoadingScreen(250);
+      if (activeCSS) {
+        const scrollingMenu = createScrollingMenu();
+        updateScrollingMenuPosition(scrollingMenu);
+        hideLoadingScreen(250);
+        replaceImages(document);
+      }
 
       document.addEventListener("click", clickEventHandler);
     })
