@@ -1,6 +1,7 @@
 let isScrolling = false;
 let scrollingMenuTop = 0;
 let activeCSS = false;
+let replacedHeader = false;
 document.readyState === "loading"
   ? document.addEventListener("DOMContentLoaded", initMoodle)
   : initMoodle();
@@ -63,15 +64,16 @@ function fetchAndReplaceContent(url) {
     .then((html) => {
       const parser = new DOMParser();
       const newDocument = parser.parseFromString(html, "text/html");
-      document.querySelector("body").outerHTML =
-        newDocument.querySelector("body").outerHTML;
+      document.querySelector("#page-content").innerHTML =
+        newDocument.querySelector("#page-content").innerHTML;
+
+      document.querySelector("#page-navbar").innerHTML =
+        newDocument.querySelector("#page-navbar").innerHTML;
       window.history.pushState({ path: url }, "", url);
-      if (activeCSS) {
-        const scrollingMenu = createScrollingMenu();
-        updateScrollingMenuPosition(scrollingMenu);
-        hideLoadingScreen(250);
-        replaceImages(document);
-      }
+      replaceImages(document);
+      const scrollingMenu = createScrollingMenu();
+      updateScrollingMenuPosition(scrollingMenu);
+      hideLoadingScreen(250);
 
       document.addEventListener("click", clickEventHandler);
     })
@@ -185,13 +187,16 @@ function addFontsToHead() {
 
 function replaceImages(htmlDocument) {
   const headers = htmlDocument.querySelectorAll(".page-header-headings");
-  headers.forEach((header) => {
-    header.innerHTML =
-      '<a style="text-decoration:none" href="https://moodle4.cs.huji.ac.il/hu23/"><img src="' +
-      chrome.runtime.getURL("assets/moodlelogo.png") +
-      '" alt="Page Header"></a>';
-    header.style.visibility = "visible";
-  });
+  if (!replacedHeader) {
+    headers.forEach((header) => {
+      header.innerHTML =
+        '<a style="text-decoration:none" href="https://moodle4.cs.huji.ac.il/hu23/"><img src="' +
+        chrome.runtime.getURL("assets/moodlelogo.png") +
+        '" style="width:300px; padding-bottom: 15px; margin-top: 15px;" alt="Page Header"></a>';
+      header.style.visibility = "visible";
+    });
+    replacedHeader = true;
+  }
 
   const images = htmlDocument.querySelectorAll("img");
   images.forEach((img) => {
@@ -387,7 +392,7 @@ function createScrollingMenu() {
   scrollingMenu.appendChild(visibleCourseList);
   scrollingMenu.appendChild(hiddenHeaderContainer);
   scrollingMenu.appendChild(hiddenCourseList);
-
+  menuContainer.innerHTML = "";
   menuContainer.appendChild(scrollingMenu);
   adjustScrollingMenuPosition(menuContainer);
 

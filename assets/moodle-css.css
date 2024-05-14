@@ -744,9 +744,9 @@ html[hujinsight="true"] .login_div3 {
   margin: 1em !important;
 }
 
-html[hujinsight="true"] .columnleft section {
+/* html[hujinsight="true"] .columnleft section {
   display: none !important;
-}
+} */
 
 .toggledsection {
   display: none;
