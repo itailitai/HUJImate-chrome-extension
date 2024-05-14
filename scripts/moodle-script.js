@@ -5,6 +5,8 @@ document.readyState === "loading"
   : initMoodle();
 
 function clickEventHandler(e) {
+  const parsedUrl = new URL(window.location.href);
+
   const target = e.target.tagName === "A" ? e.target : e.target.closest("a");
   if (!target) return;
 
@@ -19,7 +21,13 @@ function clickEventHandler(e) {
     return;
   }
 
-  if (url.includes("/resource/view.php")) {
+  if (
+    url.includes("/resource/view.php") ||
+    (parsedUrl.hostname === "moodle4.cs.huji.ac.il" &&
+      parsedUrl.pathname === "/hu23/mod/assign/view.php" &&
+      parsedUrl.searchParams.get("action") === "editsubmission" &&
+      !isNaN(parsedUrl.searchParams.get("id")))
+  ) {
     window.open(url, "_self");
     return;
   }
@@ -51,13 +59,59 @@ function fetchAndReplaceContent(url) {
 }
 
 function initMoodle() {
-  document.addEventListener("click", clickEventHandler);
-  window.addEventListener("popstate", () => window.location.reload());
-  addFontsToHead();
-  replaceImages(document);
-  const scrollingMenu = createScrollingMenu();
-  hideLoadingScreen(250);
-  updateScrollingMenuPosition(scrollingMenu);
+  const parsedUrl = new URL(window.location.href);
+  if (
+    parsedUrl.hostname === "moodle4.cs.huji.ac.il" &&
+    parsedUrl.pathname === "/hu23/mod/assign/view.php" &&
+    parsedUrl.searchParams.get("action") === "editsubmission" &&
+    !isNaN(parsedUrl.searchParams.get("id"))
+  ) {
+    showLoadingScreen();
+    // Function to be called when the element appears
+    function onDndSupportedElementFound() {
+      const element = document.querySelector(".dndsupported");
+      if (element) {
+        console.log("Element found:", element);
+        document.addEventListener("click", clickEventHandler);
+        window.addEventListener("popstate", () => window.location.reload());
+
+        replaceImages(document);
+        const scrollingMenu = createScrollingMenu();
+        hideLoadingScreen(250);
+        updateScrollingMenuPosition(scrollingMenu);
+      }
+    }
+
+    // Create a MutationObserver to watch for the element
+    const observer = new MutationObserver((mutationsList, observer) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === "childList") {
+          const element = document.querySelector(".dndsupported");
+          if (element) {
+            observer.disconnect(); // Stop observing once the element is found
+            setTimeout(() => {
+              onDndSupportedElementFound();
+            }, 500);
+            break;
+          }
+        }
+      }
+    });
+
+    // Start observing the document for changes
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Check if the element is already present when the script runs
+    onDndSupportedElementFound();
+  } else {
+    document.addEventListener("click", clickEventHandler);
+    window.addEventListener("popstate", () => window.location.reload());
+    addFontsToHead();
+    replaceImages(document);
+    const scrollingMenu = createScrollingMenu();
+    hideLoadingScreen(250);
+    updateScrollingMenuPosition(scrollingMenu);
+  }
 }
 
 function addFontsToHead() {
@@ -275,7 +329,7 @@ function createScrollingMenu() {
   scrollingMenu.appendChild(hiddenHeaderContainer);
   scrollingMenu.appendChild(hiddenCourseList);
 
-  menuContainer.innerHTML = "";
+  menuContainer.innerHTML = "<span class='title'></span>";
   menuContainer.appendChild(scrollingMenu);
   adjustScrollingMenuPosition(menuContainer);
 
