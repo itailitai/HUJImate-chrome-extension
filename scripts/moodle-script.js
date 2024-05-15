@@ -1,5 +1,5 @@
 let isScrolling = false;
-let scrollingMenuTop = 0;
+
 let activeCSS = false;
 let replacedHeader = false;
 document.readyState === "loading"
@@ -16,7 +16,6 @@ function getStorageValue(key) {
 
 function clickEventHandler(e) {
   const parsedUrl = new URL(window.location.href);
-  console.log("Click event", e.target);
   const target =
     e.target.tagName === "A" || e.target.parentElement.tagName === "A"
       ? e.target.tagName === "A"
@@ -55,7 +54,7 @@ function clickEventHandler(e) {
 
   if (window.location.href.split("#")[0] === url.split("#")[0]) return;
 
-  showLoadingScreen(true, () => fetchAndReplaceContent(url));
+  showLoadingScreen(true, fetchAndReplaceContent(url));
 }
 
 function fetchAndReplaceContent(url) {
@@ -75,12 +74,19 @@ function fetchAndReplaceContent(url) {
         "",
         url
       );
+      // update title
+      const title = newDocument.querySelector("title");
+      document.title = title ? title.innerText : "HUJI Moodle";
       if (activeCSS) {
         const scrollingMenu = createScrollingMenu();
-        updateScrollingMenuPosition(scrollingMenu);
+        scrollListener();
 
         replaceImages(document);
       }
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
       hideLoadingScreen(250);
       document.addEventListener("click", clickEventHandler);
     })
@@ -91,23 +97,28 @@ function fetchAndReplaceContent(url) {
 }
 
 async function initMoodle() {
+  showLoadingScreen(false, false, true);
+  const darkModeEnabled = await getStorageValue("darkModeEnabled");
   const ajaxEnabled = await getStorageValue("ajaxEnabled");
   const moodleCssEnabled = await getStorageValue("moodleCssEnabled");
   if (ajaxEnabled === false) {
     if (activeCSS) {
       replaceImages(document);
-      const scrollingMenu = createScrollingMenu();
-      updateScrollingMenuPosition(scrollingMenu);
+      createScrollingMenu();
+      setTimeout(() => {
+        scrollListener();
+      }, 150);
     }
 
     return; // Return from initMoodle if ajaxEnabled is false
   }
 
-  showLoadingScreen(false, false, true);
-
   if (moodleCssEnabled !== false) {
     document.querySelector("html").setAttribute("hujinsight", "true");
     activeCSS = true;
+    if (darkModeEnabled) {
+      document.querySelector("html").setAttribute("darkmode", "true");
+    }
   }
 
   hideLoadingScreen(150);
@@ -124,14 +135,15 @@ async function initMoodle() {
     function onDndSupportedElementFound() {
       const element = document.querySelector(".dndsupported");
       if (element) {
-        console.log("Element found:", element);
         document.addEventListener("click", clickEventHandler);
         window.addEventListener("popstate", () => window.location.reload());
 
         if (activeCSS) {
           replaceImages(document);
           const scrollingMenu = createScrollingMenu();
-          updateScrollingMenuPosition(scrollingMenu);
+          setTimeout(() => {
+            scrollListener();
+          }, 150);
         }
         hideLoadingScreen(250);
       }
@@ -166,11 +178,12 @@ async function initMoodle() {
     window.addEventListener("popstate", () => window.location.reload());
     chrome.storage.sync.get(["moodleCssEnabled"], function (result) {
       if (result.moodleCssEnabled !== false) {
-        console.log("Adding CSS");
         addFontsToHead();
         replaceImages(document);
         const scrollingMenu = createScrollingMenu();
-        updateScrollingMenuPosition(scrollingMenu);
+        setTimeout(() => {
+          scrollListener();
+        }, 150);
       }
     });
 
@@ -270,7 +283,7 @@ function createSkeletonLoader() {
   document.querySelector(".course-content").innerHTML = "";
   document.querySelector(".course-content").appendChild(skeletonLoader);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     const skeletonItem = document.createElement("div");
     skeletonItem.className = "skeleton-item";
     skeletonLoader.appendChild(skeletonItem);
@@ -300,11 +313,6 @@ function showSkeletonLoader(actionFunction) {
     ? (document.querySelector(".scrolling-menu").style.opacity = 0)
     : null;
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-
   setTimeout(actionFunction, 150);
 }
 
@@ -324,6 +332,9 @@ function showLoadingScreen(
   actionFunction = null,
   noSkeleton = false
 ) {
+  chrome.storage.sync.set({
+    loadingScreen: true,
+  });
   if (document.querySelector(".course-content") && !noSkeleton) {
     showSkeletonLoader(actionFunction);
     return;
@@ -336,9 +347,9 @@ function showLoadingScreen(
   } else {
     document.body.appendChild(loadingScreen);
   }
-
-  chrome.storage.sync.set({
-    loadingScreen: true,
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
   });
 }
 
@@ -347,7 +358,7 @@ function hideLoadingScreen(delay) {
   setTimeout(() => {
     const loadingScreen = document.getElementById("loadingScreen");
     chrome.storage.sync.get("loadingScreen", (result) => {
-      if (result.loadingScreen || loadingScreen) {
+      if (result.loadingScreen && loadingScreen) {
         loadingScreen.style.opacity = "0";
         loadingScreen.addEventListener("transitionend", () =>
           loadingScreen.remove()
@@ -445,6 +456,7 @@ function createMenuHeader(enText, heText) {
 // Creates the show/hide button for the hidden courses list
 function createShowHiddenButton(hiddenCourseList) {
   const button = document.createElement("img");
+  button.className = "show-hidden-button";
   button.src = chrome.runtime.getURL("assets/eye_on.png");
   button.style.cssText =
     "width: 20px; height: 20px; cursor: pointer; margin: 10px;";
@@ -508,8 +520,6 @@ function createCourseListItem(
   listItem.appendChild(listContainer);
 
   if (window.location.href.includes(courseUrl)) {
-    console.log(courseUrl);
-    console.log(window.location.href);
     link.classList.add("active");
     const subMenuList = createSubMenu(courseUrl);
     listItem.appendChild(subMenuList);
@@ -524,11 +534,6 @@ function adjustScrollingMenuPosition(menuContainer) {
   const blurDiv = document.createElement("div");
   blurDiv.className = "blur";
   menuContainer.querySelector(".scrolling-menu").appendChild(blurDiv);
-
-  if (scrollingMenuTop === 0) {
-    const rect = menuContainer.getBoundingClientRect();
-    scrollingMenuTop = rect.top + window.scrollY;
-  }
 }
 
 // Creates a submenu for course-specific actions and content
@@ -603,7 +608,6 @@ function createEyeIcon(
       eyeIcon.src === chrome.runtime.getURL("assets/eye_on.png");
     if (currentlyHidden) {
       visibleCourseList.appendChild(courseItem);
-      console.log(courseItem);
       courseItem.classList.remove("hidden");
       eyeIcon.src = chrome.runtime.getURL("assets/eye_off.png");
       localStorage.setItem(courseName, "visible");
@@ -621,23 +625,34 @@ function createEyeIcon(
 // Handles scroll events to update the position of the scrolling menu
 function scrollListener() {
   const scrollingMenu = document.querySelector(".scrolling-menu");
-  if (!scrollingMenu) return;
+  const pageNavbar = document.querySelector("#page-navbar");
+
+  if (!scrollingMenu || !pageNavbar) return;
 
   const scrollingMenuHeight = scrollingMenu.getBoundingClientRect().height;
+  const navbarRect = pageNavbar.getBoundingClientRect();
+  const navbarVisible =
+    navbarRect.top >= 0 && navbarRect.bottom <= window.innerHeight;
 
-  if (!isScrolling && window.scrollY > scrollingMenuTop) {
-    scrollingMenu.style.top = "50px";
-    document.querySelector(".blur").style.top = `${scrollingMenuHeight - 10}px`;
-    isScrolling = true;
+  if (navbarVisible) {
+    console.log("navbar visible");
+    scrollingMenu.style.top = `${navbarRect.bottom + 30}px`;
+    document.querySelector(".blur").style.top = `${
+      navbarRect.bottom + scrollingMenuHeight - 10
+    }px`;
+  } else {
+    scrollingMenu.style.top = "70px";
+    document.querySelector(".blur").style.top = `${scrollingMenuHeight + 40}px`;
+
     setTimeout(
       () => (document.querySelector(".blur").style.display = "block"),
       250
     );
-  } else if (isScrolling && window.scrollY <= scrollingMenuTop) {
-    scrollingMenu.style.top = `${scrollingMenuTop + 70}px`;
-    document.querySelector(".blur").style.display = "none";
-    isScrolling = false;
   }
+
+  setTimeout(() => {
+    document.querySelector(".scrolling-menu").style.opacity = 1;
+  }, 150);
 }
 
 // Removes the scroll event listener from the document
@@ -646,14 +661,14 @@ function removeScrollEventListener() {
 }
 
 // Updates the position of the scrolling menu based on the current scroll position
-function updateScrollingMenuPosition(scrollingMenu) {
-  if (!scrollingMenu) return;
+// function updateScrollingMenuPosition(scrollingMenu) {
+//   if (!scrollingMenu) return;
 
-  scrollingMenu.style.top = `${scrollingMenuTop + 70}px`;
-  setTimeout(() => {
-    document.querySelector(".scrolling-menu").style.opacity = 1;
-  }, 150);
-}
+//   scrollingMenu.style.top = "70px";
+//   setTimeout(() => {
+//     document.querySelector(".scrolling-menu").style.opacity = 1;
+//   }, 150);
+// }
 
 function toggleSection(section) {
   const grandParent = section.parentElement.parentElement;
@@ -662,7 +677,6 @@ function toggleSection(section) {
   const sectionContent = document.querySelector(
     `#toggledsection-${sectionNum}`
   );
-  console.log(`#toggledsection-${sectionNum}`);
   if (grandParent.classList.contains("toggle_open")) {
     section.setAttribute("aria-expanded", "false");
     grandParent.classList.remove("toggle_open");

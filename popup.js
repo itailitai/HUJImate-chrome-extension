@@ -58,4 +58,22 @@ document.addEventListener("DOMContentLoaded", function () {
       refreshCurrentTab(); // Refresh the current tab
     });
   });
+
+  // option for dark mode
+  const darkModeToggle = document.getElementById("darkModeToggle");
+
+  // Load the saved setting for dark mode
+  chrome.storage.sync.get(["darkModeEnabled"], function (result) {
+    darkModeToggle.checked = result.darkModeEnabled === true; // Default is true
+  });
+
+  // Save the setting and refresh the current tab when checkbox is changed
+  darkModeToggle.addEventListener("change", function () {
+    chrome.storage.sync.set(
+      { darkModeEnabled: darkModeToggle.checked },
+      function () {
+        refreshCurrentTab(); // Refresh the current tab
+      }
+    );
+  });
 });

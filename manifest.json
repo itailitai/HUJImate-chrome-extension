@@ -16,7 +16,7 @@
       "js": ["scripts/moodle-script.js"],
       "run_at": "document_start",
 
-      "css": ["assets/moodle-css.css"]
+      "css": ["assets/moodle-css.css", "assets/dark-moodle.css"]
     },
     {
       "matches": ["https://hujinsight.com/*"],
