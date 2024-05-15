@@ -102,14 +102,19 @@ async function initMoodle() {
   const ajaxEnabled = await getStorageValue("ajaxEnabled");
   const moodleCssEnabled = await getStorageValue("moodleCssEnabled");
   if (ajaxEnabled === false) {
-    if (activeCSS) {
+    if (moodleCssEnabled) {
+      document.querySelector("html").setAttribute("hujinsight", "true");
+      activeCSS = true;
+      if (darkModeEnabled) {
+        document.querySelector("html").setAttribute("darkmode", "true");
+      }
       replaceImages(document);
       createScrollingMenu();
       setTimeout(() => {
         scrollListener();
       }, 150);
     }
-
+    hideLoadingScreen(150);
     return; // Return from initMoodle if ajaxEnabled is false
   }
 
@@ -635,7 +640,6 @@ function scrollListener() {
     navbarRect.top >= 0 && navbarRect.bottom <= window.innerHeight;
 
   if (navbarVisible) {
-    console.log("navbar visible");
     scrollingMenu.style.top = `${navbarRect.bottom + 30}px`;
     document.querySelector(".blur").style.top = `${
       navbarRect.bottom + scrollingMenuHeight - 10
