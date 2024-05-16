@@ -1,8 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "HujiInsight Injector",
+  "name": "HUJImate: HUJI Moodle Enhancer & HUJInsight Sync",
   "version": "1.0",
   "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "background": {
     "service_worker": "background.js"
   },
@@ -32,7 +37,8 @@
       "16": "icon16.png",
       "48": "icon48.png",
       "128": "icon128.png"
-    }
+    },
+    "default_title": "HUJImate - HUJI Moodle Enhancer & HUJInsight Sync"
   },
 
   "web_accessible_resources": [

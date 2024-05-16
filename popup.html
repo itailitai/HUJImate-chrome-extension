@@ -2,7 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Login to HujInsight</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>HUJIMate extension settings</title>
     <style>
       /* Reset some default styles */
       body,
@@ -14,11 +20,12 @@
 
       /* Basic styles */
       body {
-        font-family: Arial, sans-serif;
+        font-family: "Heebo", sans-serif !important;
         background-color: #f4f7fe;
         padding: 20px;
         box-sizing: border-box;
         direction: rtl;
+        font-size: 1em;
       }
 
       h1 {
@@ -29,10 +36,14 @@
 
       p {
         width: 200px;
-        font-weight: bold;
-        font-size: 16px;
+        font-size: 0.9em;
         direction: rtl;
-        margin-bottom: 10px;
+        color: red;
+        padding: 1em;
+        border-radius: 1em;
+        font-weight: normal !important;
+        margin-top: 1em;
+        background-color: rgb(228 235 251);
         text-align: center;
       }
 
@@ -64,6 +75,8 @@
         cursor: pointer;
         display: flex;
         align-items: center;
+        font-family: "Heebo", sans-serif !important;
+        font-size: 1.1em;
       }
 
       .share-button:hover {

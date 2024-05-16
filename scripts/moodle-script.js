@@ -43,6 +43,7 @@ function clickEventHandler(e) {
 
   if (
     url.includes("/resource/view.php") ||
+    url.includes("/login/logout") ||
     (parsedUrl.hostname === "moodle4.cs.huji.ac.il" &&
       parsedUrl.pathname === "/hu23/mod/assign/view.php" &&
       parsedUrl.searchParams.get("action") === "editsubmission" &&
@@ -455,6 +456,7 @@ function createScrollingMenuElement() {
 // Creates a header for the menu with text based on the current language
 function createMenuHeader(enText, heText) {
   const header = document.createElement("h3");
+  header.style.marginTop = "15px";
   header.textContent =
     document.querySelector("html").getAttribute("lang") === "he"
       ? heText
@@ -644,7 +646,7 @@ function scrollListener() {
     navbarRect.top >= 0 && navbarRect.bottom <= window.innerHeight;
 
   if (navbarVisible) {
-    scrollingMenu.style.top = `${navbarRect.bottom + 30}px`;
+    scrollingMenu.style.top = `${navbarRect.bottom + 50}px`;
     document.querySelector(".blur").style.top = `${
       navbarRect.bottom + scrollingMenuHeight - 10
     }px`;
