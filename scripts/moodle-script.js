@@ -757,6 +757,20 @@ function fetchPanoptoContent() {
     ).then((response) => {
       response.text().then((text) => {
         document.querySelector("#block_panopto_content").innerHTML = text;
+        document
+          .getElementById("showAllToggle")
+          .addEventListener("click", () => {
+            var showAllToggle = document.getElementById("showAllToggle");
+            var hiddenLecturesDiv =
+              document.getElementById("hiddenLecturesDiv");
+            if (hiddenLecturesDiv.style.display == "block") {
+              hiddenLecturesDiv.style.display = "none";
+              showAllToggle.innerHTML = "Show all";
+            } else {
+              hiddenLecturesDiv.style.display = "block";
+              showAllToggle.innerHTML = "Show less";
+            }
+          });
       });
     });
   } catch (e) {
