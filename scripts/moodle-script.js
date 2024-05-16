@@ -84,6 +84,7 @@ function fetchAndReplaceContent(url) {
 
         replaceImages(document);
       }
+      fetchPanoptoContent();
       window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -194,6 +195,7 @@ async function initMoodle() {
         addFontsToHead();
         replaceImages(document);
         const scrollingMenu = createScrollingMenu();
+        fetchPanoptoContent();
         setTimeout(() => {
           scrollListener();
         }, 150);
@@ -714,5 +716,50 @@ function toggleSection(section) {
     // set aria-expanded to true
     parentElement.setAttribute("aria-expanded", "true");
     sectionContent.classList.add("sectionopen");
+  }
+}
+
+function fetchPanoptoContent() {
+  try {
+    const sesskey = document
+      .querySelectorAll(".logininfo a")[1]
+      .href.split("sesskey=")[1];
+    const courseid = document
+      .querySelector("#block_panopto_content")
+      .getAttribute("courseid");
+    //sesskey=Gv822kcEBQ&courseid=67594
+    fetch(
+      "https://moodle4.cs.huji.ac.il/hu23/blocks/panopto/panopto_content.php",
+      {
+        headers: {
+          accept: "*/*",
+          "accept-language": "en-US,en;q=0.9,he-IL;q=0.8,he;q=0.7",
+          "cache-control": "no-cache",
+          "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+          pragma: "no-cache",
+          priority: "u=1, i",
+          "sec-ch-ua":
+            '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "same-origin",
+          "x-requested-with": "XMLHttpRequest",
+        },
+        referrer: window.location.href,
+        referrerPolicy: "strict-origin-when-cross-origin",
+        body: "sesskey=" + sesskey + "&courseid=" + parseInt(courseid),
+        method: "POST",
+        mode: "cors",
+        credentials: "include",
+      }
+    ).then((response) => {
+      response.text().then((text) => {
+        document.querySelector("#block_panopto_content").innerHTML = text;
+      });
+    });
+  } catch (e) {
+    console.log(e);
   }
 }
