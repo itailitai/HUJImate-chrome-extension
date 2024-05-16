@@ -115,6 +115,7 @@ async function initMoodle() {
         scrollListener();
       }, 150);
     }
+
     hideLoadingScreen(150);
     return; // Return from initMoodle if ajaxEnabled is false
   }
@@ -125,6 +126,11 @@ async function initMoodle() {
     if (darkModeEnabled) {
       document.querySelector("html").setAttribute("darkmode", "true");
     }
+  }
+
+  const welcomeMessage = document.querySelector("#page-header > div > h2");
+  if (welcomeMessage) {
+    welcomeMessage.remove();
   }
 
   hideLoadingScreen(150);
@@ -646,7 +652,7 @@ function scrollListener() {
     navbarRect.top >= 0 && navbarRect.bottom <= window.innerHeight;
 
   if (navbarVisible) {
-    scrollingMenu.style.top = `${navbarRect.bottom + 50}px`;
+    scrollingMenu.style.top = `${navbarRect.bottom + 30}px`;
     document.querySelector(".blur").style.top = `${
       navbarRect.bottom + scrollingMenuHeight - 10
     }px`;
