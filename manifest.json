@@ -41,7 +41,8 @@
         "assets/moodlelogo.png",
         "assets/loader.gif",
         "assets/eye_on.png",
-        "assets/eye_off.png"
+        "assets/eye_off.png",
+        "assets/hujinsight.svg"
       ],
       "matches": ["https://moodle4.cs.huji.ac.il/*"]
     }

@@ -16,14 +16,33 @@ getJwtToken((token) => {
     messageElement.textContent =
       "אינך מחובר/ת למשתמש ה-HUJInsight שלך. יש להתחבר על מנת לשתף ציונים.";
     messageElement.style.color = "red";
+    // add button with image
+    const button = document.createElement("button");
+    button.className = "share-button";
+    button.textContent = "התחבר ל- HUJInsight";
+    // go to HUJInsight on click
+    button.addEventListener("click", () => {
+      chrome.tabs.create({ url: "https://hujinsight.com" });
+    });
+    const img = document.createElement("img");
+    img.src = "assets/hujinsight.svg";
+    img.style.height = "30px";
+    img.style.width = "30px";
+    img.style.marginRight = "10px";
+    button.prepend(img);
+    // add button to popup
+    document.querySelector("p").after(button);
   }
 });
 
-// Function to refresh the current tab
-function refreshCurrentTab() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs[0]) {
-      chrome.tabs.reload(tabs[0].id);
+// Function to refresh the moodle tabs
+function refreshTabWithUrl() {
+  const targetUrl = "moodle4.cs.huji.ac.il";
+  chrome.tabs.query({}, (tabs) => {
+    for (let tab of tabs) {
+      if (tab.url && tab.url.includes(targetUrl)) {
+        chrome.tabs.reload(tab.id);
+      }
     }
   });
 }
@@ -50,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Save the setting and refresh the current tab when CSS checkbox is changed
   cssToggle.addEventListener("change", function () {
     chrome.storage.sync.set({ moodleCssEnabled: cssToggle.checked }, () => {
-      refreshCurrentTab(); // Refresh the current tab
+      refreshTabWithUrl(); // Refresh the current tab
 
       // Enable/disable dark mode toggle based on CSS toggle state
       if (cssToggle.checked) {
@@ -75,14 +94,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Save the setting and refresh the current tab when AJAX checkbox is changed
   ajaxToggle.addEventListener("change", function () {
     chrome.storage.sync.set({ ajaxEnabled: ajaxToggle.checked }, () => {
-      refreshCurrentTab(); // Refresh the current tab
+      refreshTabWithUrl(); // Refresh the current tab
     });
   });
 
   // Save the setting and refresh the current tab when dark mode checkbox is changed
   darkModeToggle.addEventListener("change", function () {
     chrome.storage.sync.set({ darkModeEnabled: darkModeToggle.checked }, () => {
-      refreshCurrentTab(); // Refresh the current tab
+      refreshTabWithUrl(); // Refresh the current tab
     });
   });
 });

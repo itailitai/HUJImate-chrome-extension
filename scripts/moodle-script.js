@@ -160,10 +160,11 @@ async function initMoodle() {
         if (mutation.type === "childList") {
           const element = document.querySelector(".dndsupported");
           if (element) {
-            observer.disconnect(); // Stop observing once the element is found
             setTimeout(() => {
               onDndSupportedElementFound();
             }, 500);
+            observer.disconnect(); // Stop observing once the element is found
+
             break;
           }
         }
@@ -203,8 +204,7 @@ function addFontsToHead() {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   `;
   const fonts = [
-    "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap",
-    "https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap",
+    "https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swaphttps://fonts.googleapis.com/css2?family=Heebo:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap",
   ];
   fonts.forEach((fontUrl) => {
     const link = document.createElement("link");
@@ -363,7 +363,7 @@ function hideLoadingScreen(delay) {
   setTimeout(() => {
     const loadingScreen = document.getElementById("loadingScreen");
     chrome.storage.sync.get("loadingScreen", (result) => {
-      if (result.loadingScreen && loadingScreen) {
+      if (result.loadingScreen || loadingScreen) {
         loadingScreen.style.opacity = "0";
         loadingScreen.addEventListener("transitionend", () =>
           loadingScreen.remove()
@@ -378,7 +378,9 @@ function hideLoadingScreen(delay) {
 
 // Extracts unique course links from the DOM and returns a dictionary of course names and URLs
 function extractUniqueCourseLinks() {
-  const courseLinks = document.querySelectorAll("li.type_course a");
+  const courseLinks = document.querySelectorAll(
+    "li.type_course > .tree_item > a"
+  );
   const uniqueUrls = new Set();
   const coursesDict = {};
 
@@ -387,6 +389,8 @@ function extractUniqueCourseLinks() {
       link.href.includes("/course/view.php") &&
       /^[0-9]/.test(link.innerHTML)
     ) {
+      console.log(link.innerHTML);
+      console.log(link);
       const url = link.href.split("#")[0];
       uniqueUrls.add(url);
       coursesDict[link.innerHTML] = url;

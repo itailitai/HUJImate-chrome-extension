@@ -188,6 +188,25 @@ html[darkmode="true"] .course-content h3 {
   color: var(--darkmode-primary-color) !important;
 }
 
+html[darkmode="true"] .fp-iconview .fp-filename-field .fp-filename {
+  background: var(--darkmode-secondary-color) !important;
+}
+
+html[darkmode="true"] .fp-iconview .fp-thumbnail img {
+  filter: invert(1);
+}
+html[darkmode="true"] .filemanager-toolbar a {
+  background: var(--darkmode-secondary-color) !important;
+}
+html[darkmode="true"] h5,
+html[darkmode="true"] h3 {
+  color: var(--darkmode-text-color) !important;
+}
+
+html[darkmode="true"] .fp-select .fp-thumbnail {
+  filter: invert(1);
+}
+
 html[darkmode="true"] .activity-grid img {
   filter: invert(1);
 }
@@ -340,7 +359,6 @@ html[darkmode="true"] .scrolling-menu li:hover {
 }
 
 html[darkmode="true"] .scrolling-menu a {
-  font-family: "Roboto", sans-serif;
   font-size: 16px;
   color: #e0e0e0;
   font-weight: 500;
@@ -697,4 +715,8 @@ html[darkmode="true"] a:not([class]):focus {
   outline: none !important;
   background: none !important;
   box-shadow: none !important;
+}
+
+html[darkmode="true"] .moodle-dialogue-base .moodle-dialogue-wrap {
+  background-color: var(--darkmode-background-color) !important;
 }
