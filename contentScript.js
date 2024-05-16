@@ -1,12 +1,4 @@
-// This script runs in the context of the webpage
-if (document.readyState === "loading") {
-  // Loading hasn't finished yet
-  document.addEventListener("DOMContentLoaded", buttonSetup);
-} else {
-  // `DOMContentLoaded` has already fired
-  buttonSetup();
-}
-function buttonSetup() {
+const buttonSetup = () => {
   console.log("Hujinsight DOMContentLoaded");
   var button = document.createElement("button");
   button.textContent = "שתפו ציונים ב-HUJInsight";
@@ -46,7 +38,7 @@ function buttonSetup() {
       document.querySelectorAll("#ziyunim > hr").length - 1
     ];
   appendAfter.insertAdjacentElement("afterend", button);
-}
+};
 
 class ForbiddenError extends Error {
   constructor(message) {
@@ -55,7 +47,7 @@ class ForbiddenError extends Error {
   }
 }
 
-function hujinsight(token) {
+const hujinsight = (token) => {
   let tokenErrorOccurred = false;
   let importCourses = false;
 
@@ -109,19 +101,19 @@ function hujinsight(token) {
   }
 
   // Replace the askImportCourses function with the new modal
-  async function askImportCourses() {
+  const askImportCourses = async () => {
     importCourses = await createCustomModal();
-  }
+  };
 
   // Function to check if the URL starts with the given pattern and if the element with the given ID exists
-  function checkPrerequisites(urlPattern, elementId) {
+  const checkPrerequisites = (urlPattern, elementId) => {
     const currentURL = window.location.href;
     return (
       currentURL.startsWith(urlPattern) && document.getElementById(elementId)
     );
-  }
+  };
 
-  async function runScript() {
+  const runScript = async () => {
     try {
       await askImportCourses();
       // Function to update loading overlay progress with more informative UI
@@ -148,7 +140,7 @@ function hujinsight(token) {
       }
 
       // Function to create an improved loading overlay with a more detailed design
-      function createLoadingOverlay(totalURLs) {
+      const createLoadingOverlay = (totalURLs) => {
         const existingOverlay = document.getElementById("loading-overlay");
         if (existingOverlay) return; // If overlay already exists, don't recreate it
 
@@ -216,10 +208,10 @@ function hujinsight(token) {
         container.appendChild(progressBar);
         overlay.appendChild(container);
         document.body.appendChild(overlay);
-      }
+      };
 
       // Function to remove the loading overlay
-      function removeLoadingOverlay(message) {
+      const removeLoadingOverlay = (message) => {
         const container = document.getElementById("plugin-container");
         if (container) {
           const messageElement = document.createElement("div");
@@ -237,16 +229,16 @@ function hujinsight(token) {
             );
           }, 4000);
         }
-      }
+      };
 
-      async function postStatsData(
+      const postStatsData = async (
         courseId,
         url,
         semester,
         average,
         sd,
         userGrade
-      ) {
+      ) => {
         const iframe = document.createElement("iframe");
         iframe.src = "https://hujinsight.com/script-jwt-page";
         iframe.id = "crossOriginIframe";
@@ -286,10 +278,10 @@ function hujinsight(token) {
 
           throw new Error("Error posting data:", error);
         }
-      }
+      };
 
       // Function to extract data from a URL
-      async function fetchDataFromURL(url) {
+      const fetchDataFromURL = async (url) => {
         if (tokenErrorOccurred) {
           throw new Error("Token error occurred, stopping data fetch.");
         }
@@ -440,9 +432,9 @@ function hujinsight(token) {
             ", הסטטיסטיקות יעודכנו באתר לאחר אישור.";
           removeLoadingOverlay(completionMessage);
         }
-      }
+      };
 
-      async function fetchOtherYearsLinks() {
+      const fetchOtherYearsLinks = async () => {
         const currentYear = document.querySelector(
           'select[name="yearsafa"]'
         ).value;
@@ -508,7 +500,7 @@ function hujinsight(token) {
           }
         }
         return allLinks;
-      }
+      };
 
       // Get all the links in the last column of the table
       createLoadingOverlay();
@@ -577,7 +569,7 @@ function hujinsight(token) {
       removeLoadingOverlay(completionMessage);
       return;
     }
-  }
+  };
 
   const urlPattern = "https://www.huji.ac.il/dataj/controller";
   const elementId = "ziyunim";
@@ -587,10 +579,19 @@ function hujinsight(token) {
   } else {
     alert("נא להפעיל את הסקריפט בדף הציונים");
   }
-}
+};
 
-function getJwtToken(callback) {
+const getJwtToken = (callback) => {
   chrome.storage.local.get(["jwtToken"], (result) => {
     callback(result.jwtToken);
   });
+};
+
+// This script runs in the context of the webpage
+if (document.readyState === "loading") {
+  // Loading hasn't finished yet
+  document.addEventListener("DOMContentLoaded", buttonSetup);
+} else {
+  // `DOMContentLoaded` has already fired
+  buttonSetup();
 }

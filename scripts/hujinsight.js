@@ -1,13 +1,13 @@
 // Function to retrieve token from local storage
-function getJwtTokenWithDelay() {
+const getJwtTokenWithDelay = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(localStorage.getItem("jwtToken"));
     }, 2000); // 2-second delay
   });
-}
+};
 
-async function setupToken() {
+const setupToken = async () => {
   const token = await getJwtTokenWithDelay();
 
   if (token) {
@@ -21,7 +21,7 @@ async function setupToken() {
     });
     chrome.runtime.sendMessage({ action: "saveToken", token: token });
   }
-}
+};
 
 if (document.readyState === "loading") {
   // Loading hasn't finished yet
@@ -33,7 +33,7 @@ if (document.readyState === "loading") {
 
 // Modal creation
 
-function createSuccessModal() {
+const createSuccessModal = () => {
   // Create the modal container
   const modal = document.createElement("div");
   modal.id = "success-modal";
@@ -106,11 +106,11 @@ function createSuccessModal() {
   document.body.appendChild(modal);
 
   // Function to show the modal
-  function showModal() {
+  const showModal = () => {
     setTimeout(() => {
       modal.style.opacity = "1";
     }, 250);
-  }
+  };
 
   // Close the modal when clicking outside the modal content
   window.onclick = function (event) {
@@ -123,4 +123,4 @@ function createSuccessModal() {
 
   // Show the modal
   showModal();
-}
+};

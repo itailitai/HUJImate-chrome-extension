@@ -1,20 +1,16 @@
 let isScrolling = false;
-
 let activeCSS = false;
 let replacedHeader = false;
-document.readyState === "loading"
-  ? document.addEventListener("DOMContentLoaded", initMoodle)
-  : initMoodle();
 
-function getStorageValue(key) {
+const getStorageValue = (key) => {
   return new Promise((resolve) => {
-    chrome.storage.sync.get([key], function (result) {
+    chrome.storage.sync.get([key], (result) => {
       resolve(result[key]);
     });
   });
-}
+};
 
-function clickEventHandler(e) {
+const clickEventHandler = (e) => {
   const parsedUrl = new URL(window.location.href);
   const target =
     e.target.tagName === "A" || e.target.parentElement.tagName === "A"
@@ -56,9 +52,9 @@ function clickEventHandler(e) {
   if (window.location.href.split("#")[0] === url.split("#")[0]) return;
 
   showLoadingScreen(true, fetchAndReplaceContent(url));
-}
+};
 
-function fetchAndReplaceContent(url) {
+const fetchAndReplaceContent = (url) => {
   fetch(url)
     .then((response) => response.text())
     .then((html) => {
@@ -96,9 +92,9 @@ function fetchAndReplaceContent(url) {
       console.error("Error fetching the data:", error);
       window.location.href = url;
     });
-}
+};
 
-async function initMoodle() {
+const initMoodle = async () => {
   showLoadingScreen(false, false, true);
   const darkModeEnabled = await getStorageValue("darkModeEnabled");
   const ajaxEnabled = await getStorageValue("ajaxEnabled");
@@ -145,7 +141,7 @@ async function initMoodle() {
   ) {
     showLoadingScreen();
     // Function to be called when the element appears
-    function onDndSupportedElementFound() {
+    const onDndSupportedElementFound = () => {
       const element = document.querySelector(".dndsupported");
       if (element) {
         document.addEventListener("click", clickEventHandler);
@@ -160,7 +156,7 @@ async function initMoodle() {
         }
         hideLoadingScreen(250);
       }
-    }
+    };
 
     // Create a MutationObserver to watch for the element
     const observer = new MutationObserver((mutationsList, observer) => {
@@ -190,7 +186,7 @@ async function initMoodle() {
   } else {
     document.addEventListener("click", clickEventHandler);
     window.addEventListener("popstate", () => window.location.reload());
-    chrome.storage.sync.get(["moodleCssEnabled"], function (result) {
+    chrome.storage.sync.get(["moodleCssEnabled"], (result) => {
       if (result.moodleCssEnabled !== false) {
         addFontsToHead();
         replaceImages(document);
@@ -204,9 +200,9 @@ async function initMoodle() {
 
     hideLoadingScreen(250);
   }
-}
+};
 
-function addFontsToHead() {
+const addFontsToHead = () => {
   const head = document.head;
   head.innerHTML += `
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -221,16 +217,15 @@ function addFontsToHead() {
     link.href = fontUrl;
     head.appendChild(link);
   });
-}
+};
 
-function replaceImages(htmlDocument) {
+const replaceImages = (htmlDocument) => {
   const headers = htmlDocument.querySelectorAll(".page-header-headings");
   if (!replacedHeader) {
     headers.forEach((header) => {
-      header.innerHTML =
-        '<a style="text-decoration:none" href="https://moodle4.cs.huji.ac.il/hu23/"><img src="' +
-        chrome.runtime.getURL("assets/moodlelogo.png") +
-        '" style="width:300px; padding-bottom: 15px; margin-top: 15px;" alt="Page Header"></a>';
+      header.innerHTML = `<a style="text-decoration:none" href="https://moodle4.cs.huji.ac.il/hu23/"><img src="${chrome.runtime.getURL(
+        "assets/moodlelogo.png"
+      )}" style="width:300px; padding-bottom: 15px; margin-top: 15px;" alt="Page Header"></a>`;
       header.style.visibility = "visible";
     });
     replacedHeader = true;
@@ -288,10 +283,10 @@ function replaceImages(htmlDocument) {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAABXhJREFUeF7tm1eoJEUUhr81IcYHV8GIYhbFLOaMmHVNiPjggygoGB8UFDMIRhQfRPHNiBnMoGIOGEFMYABzFhVBBbU+qIa27JmunumZ7tl7Cy7s7dvVfc7f/8m1C5jja8Ec158mALwA7DyjgD0P7FYlexMA/plR5QuxK3UdBYAme/qAWfHh5gFoagJ9tPk3gAOBbxpQa2QG9NXmPwD2Ar7KBGGxA0C9m4Cw2AHwDrA58C6wd4Y5tArALsASwHMJ/dLr/v5i6Z5lgC2BC4GDStcHPW8Yu1cDnmoAQqsAFKEk9Q/p9WGh8n7g8KjhoOcNA8A9q4bE5klgiwxz6BSA4uV/AlcB5wE7AK+MCYDbBSGHCb0AQIF/BVYCVgR+aQGAXBB6AYAMuBI4v0UGFGZSx4ROAaiy5YdjMuPfRvEBFjUWN+U1DIReAGAU2CpGATO5tEBpO+l6HdguvqRzAJYCrgNOqaDDKAzITAD/x67GxVDVV9GJ6cw+A9aKkvjvdYCVgZ8T53ZmuH5tvHYWcAWw5BQYUGVerQCwKFD5gRDGDgBuCpQWpJOAx0JmdgxwV4V3vyV+fR2h9L8jRoNRfUCnDDAH3wn4KZFilZDcvFViRUrtZ4Ejge+B7QMQryZAVSm1a0XGmav8xBjgg6X82QGIx6M0+4fYfnVJeS/rqQVBxYv1MXAssGzpepVHL+73b+X9TZSfKABNBenq/qz0fFjO3nZomjYQ8wBMIg+Y9lcc532tMWDWu8BjZ4LzAIzDww72pl+8cwbIoG2Aw2J+sHqSRn8d4/2DgG3vcVdvAFDxo0PufymwUaZWZpr2DO6NaXbmtv/c1gsA1g9K3x6bH4V03wEnAG8DP8SiyIJqXeDgyJC1480vA8cBn4yAQOcAOLS4G7A+KK8voil8O0Apq0QBuhhYM9YNR4UhyDMNQegUAJW3Rli6RmjL5kdC+XwGIDPKy57hrcEfHApYQe7XEITOAJD2dnvTLz8Mi6fjcCO9x9mDfYTTIhPsJOeaQycA6PC0WwVturT7zys2CYIzBJnwEuAQJac+6QSAcjOkLQB8jubwfmi+rAHoD4wOdWvqAPj1FTI31JUVcLCxT41GJwaneHN8x6Z12pdYMrVaYNsQxl7LEKx8i07Q9rg9w9QJpo8yOnwakycTqjdr3jV1BpjomLzY+dWrT2LdEIA6NYbIi/oGgJ58T+CQ0It/aBLax2aqjMkxmakz4ENgQ2C9SNVJYLBx9AGmypv0jQHOCVYIs7/lgd8noX18vu/5LUaGYa+ZOgOc9Bqu/FHAdGkejsY9IOGUaJxVTJh7BYC0NARuAHyUSOY1i5/lxtG6tLeXJqBjsgZw6vNooui5wOUtKe9jeukErd4uAK4PE6PTJwyAZ4wu6ZsTNDlxHO3EyILor5KAbZvA1nEE1ysfYMr5Xhh6GqpMWx2GlpdO0NMhOsG6MnmYYr5jswxzmnoUUCYLFZsgskBF0+HpMLkHDUENqZ4DvCemwQ5X7+srALLAc4E7xvH5EZmlq/oMGoIaXj2P6LlCzy17X2/LYRUxE3TsvRC4Mebufw/4YirjRFmbrssNLJbsM1gQ5axOTKAQbI/wv0qeADwTJHVPDl2dHxOpbYJ63NXMsW7ZEtu34TmBTgFQIUFQeZngsfZzQv5+J/BH1NYS+Jo6zWOZrN2nx3LrtnYOQGEOt8XTJP5uJ9g2ucfbbG0JwrClzR/fgPblZ/UCAAXSMeoML8uo4AoFDHX2FnK8/SAAewNAWUCdXTEas79XnDCzGfplaTTmOaNx16BIMfIpsVmdDpeB1I/sXoVszhGZWQUgS+55AIYYXE7WNa69TnL/2AzQbszTZ3ENtPlUmSyUZhGBXJnnPAD/Ao0hilAwS0cdAAAAAElFTkSuQmCC";
     }
   });
-}
+};
 
 // Creates and appends skeleton loader elements to indicate loading state
-function createSkeletonLoader() {
+const createSkeletonLoader = () => {
   const skeletonLoader = document.createElement("div");
   skeletonLoader.className = "skeleton-loader";
   document.querySelector(".course-content").innerHTML = "";
@@ -302,10 +297,10 @@ function createSkeletonLoader() {
     skeletonItem.className = "skeleton-item";
     skeletonLoader.appendChild(skeletonItem);
   }
-}
+};
 
 // Creates a loading screen element with specified styles and content
-function createLoadingScreenElement() {
+const createLoadingScreenElement = () => {
   const loadingScreen = document.createElement("div");
   loadingScreen.id = "loadingScreen";
   loadingScreen.style.cssText = `
@@ -318,34 +313,34 @@ function createLoadingScreenElement() {
     "assets/loader.gif"
   )}' alt='Loading...'><p style='color:#3210ce;'>Loading...</p></div>`;
   return loadingScreen;
-}
+};
 
 // Displays the skeleton loader and scrolls to the top of the page
-function showSkeletonLoader(actionFunction) {
+const showSkeletonLoader = (actionFunction) => {
   createSkeletonLoader();
   document.querySelector(".scrolling-menu")
     ? (document.querySelector(".scrolling-menu").style.opacity = 0)
     : null;
 
   setTimeout(actionFunction, 150);
-}
+};
 
 // Shows the loading screen with a fade-in effect and executes the action function after transition
-function showDelayedLoadingScreen(loadingScreen, actionFunction) {
+const showDelayedLoadingScreen = (loadingScreen, actionFunction) => {
   loadingScreen.style.opacity = "0";
   document.body.appendChild(loadingScreen);
   setTimeout(() => {
     loadingScreen.style.opacity = "1";
   }, 50);
   loadingScreen.addEventListener("transitionend", actionFunction);
-}
+};
 
 // Main function to show either the skeleton loader or loading screen, depending on the presence of course content
-function showLoadingScreen(
+const showLoadingScreen = (
   withDelay = false,
   actionFunction = null,
   noSkeleton = false
-) {
+) => {
   chrome.storage.sync.set({
     loadingScreen: true,
   });
@@ -365,10 +360,10 @@ function showLoadingScreen(
     top: 0,
     behavior: "smooth",
   });
-}
+};
 
 // Hides the loading screen after a specified delay
-function hideLoadingScreen(delay) {
+const hideLoadingScreen = (delay) => {
   setTimeout(() => {
     const loadingScreen = document.getElementById("loadingScreen");
     chrome.storage.sync.get("loadingScreen", (result) => {
@@ -383,10 +378,10 @@ function hideLoadingScreen(delay) {
       }
     });
   }, delay);
-}
+};
 
 // Extracts unique course links from the DOM and returns a dictionary of course names and URLs
-function extractUniqueCourseLinks() {
+const extractUniqueCourseLinks = () => {
   const courseLinks = document.querySelectorAll(
     "li.type_course > .tree_item > a"
   );
@@ -407,10 +402,10 @@ function extractUniqueCourseLinks() {
   });
 
   return coursesDict;
-}
+};
 
 // Main function to create the scrolling menu
-function createScrollingMenu() {
+const createScrollingMenu = () => {
   removeScrollEventListener();
   window.addEventListener("scroll", scrollListener);
 
@@ -444,25 +439,25 @@ function createScrollingMenu() {
   adjustScrollingMenuPosition(menuContainer);
 
   return scrollingMenu;
-}
+};
 
 // Extracts the appropriate container for the scrolling menu based on the URL
-function getMenuContainer() {
+const getMenuContainer = () => {
   return window.location.href === "https://moodle4.cs.huji.ac.il/hu23/" ||
     window.location.href.includes("https://moodle4.cs.huji.ac.il/hu23/?lang=")
     ? document.querySelector(".columnleft")
     : document.getElementById("frame-column");
-}
+};
 
 // Creates the scrolling menu element
-function createScrollingMenuElement() {
+const createScrollingMenuElement = () => {
   const scrollingMenu = document.createElement("div");
   scrollingMenu.className = "scrolling-menu";
   return scrollingMenu;
-}
+};
 
 // Creates a header for the menu with text based on the current language
-function createMenuHeader(enText, heText) {
+const createMenuHeader = (enText, heText) => {
   const header = document.createElement("h3");
   header.style.marginTop = "15px";
   header.textContent =
@@ -470,27 +465,27 @@ function createMenuHeader(enText, heText) {
       ? heText
       : enText;
   return header;
-}
+};
 
 // Creates the show/hide button for the hidden courses list
-function createShowHiddenButton(hiddenCourseList) {
+const createShowHiddenButton = ({ style }) => {
   const button = document.createElement("img");
   button.className = "show-hidden-button";
   button.src = chrome.runtime.getURL("assets/eye_on.png");
   button.style.cssText =
     "width: 20px; height: 20px; cursor: pointer; margin: 10px;";
   button.onclick = () => {
-    const isHidden = hiddenCourseList.style.display === "none";
-    hiddenCourseList.style.display = isHidden ? "flex" : "none";
+    const isHidden = style.display === "none";
+    style.display = isHidden ? "flex" : "none";
     button.src = chrome.runtime.getURL(
       isHidden ? "assets/eye_off.png" : "assets/eye_on.png"
     );
   };
   return button;
-}
+};
 
 // Creates the container for the hidden header and show/hide button
-function createHiddenHeaderContainer(hiddenHeader, showHiddenButton) {
+const createHiddenHeaderContainer = (hiddenHeader, showHiddenButton) => {
   const hiddenHeaderContainer = document.createElement("div");
   hiddenHeaderContainer.style.display = "flex";
   hiddenHeaderContainer.style.justifyContent = "space-between";
@@ -498,10 +493,10 @@ function createHiddenHeaderContainer(hiddenHeader, showHiddenButton) {
   hiddenHeaderContainer.appendChild(hiddenHeader);
   hiddenHeaderContainer.appendChild(showHiddenButton);
   return hiddenHeaderContainer;
-}
+};
 
 // Appends course items to the appropriate lists and configures visibility toggles
-function appendCourseItems(courses, visibleCourseList, hiddenCourseList) {
+const appendCourseItems = (courses, visibleCourseList, hiddenCourseList) => {
   for (const courseName in courses) {
     const listItem = createCourseListItem(
       courseName,
@@ -519,15 +514,15 @@ function appendCourseItems(courses, visibleCourseList, hiddenCourseList) {
       visibleCourseList.appendChild(listItem);
     }
   }
-}
+};
 
 // Creates a list item for a course with a link and visibility toggle
-function createCourseListItem(
+const createCourseListItem = (
   courseName,
   courseUrl,
   visibleCourseList,
   hiddenCourseList
-) {
+) => {
   const listItem = document.createElement("li");
   const listContainer = document.createElement("div");
   listContainer.className = "list-container";
@@ -546,17 +541,17 @@ function createCourseListItem(
 
   createEyeIcon(listItem, courseName, visibleCourseList, hiddenCourseList);
   return listItem;
-}
+};
 
 // Adjusts the position of the scrolling menu based on the container's position
-function adjustScrollingMenuPosition(menuContainer) {
+const adjustScrollingMenuPosition = (menuContainer) => {
   const blurDiv = document.createElement("div");
   blurDiv.className = "blur";
   menuContainer.querySelector(".scrolling-menu").appendChild(blurDiv);
-}
+};
 
 // Creates a submenu for course-specific actions and content
-function createSubMenu(courseUrl) {
+const createSubMenu = (courseUrl) => {
   const subMenuList = document.createElement("div");
   subMenuList.className = "sub-menu";
   subMenuList.style.display = "block";
@@ -584,10 +579,10 @@ function createSubMenu(courseUrl) {
   });
 
   return subMenuList;
-}
+};
 
 // Creates a link for the grades page
-function createGradesLink(courseUrl) {
+const createGradesLink = (courseUrl) => {
   const gradesLink = document.createElement("a");
   const courseId = courseUrl.split("id=")[1];
   gradesLink.href = `https://moodle4.cs.huji.ac.il/hu23/grade/report/user/index.php?id=${courseId}`;
@@ -596,24 +591,24 @@ function createGradesLink(courseUrl) {
       ? "ציונים"
       : "Grades";
   return gradesLink;
-}
+};
 
 // Creates an image for the grades link
-function createGradesImage() {
+const createGradesImage = () => {
   const gradesImage = document.createElement("img");
   gradesImage.src =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAABYJJREFUeF7tmlWotUUUhp/f7m5UVGzsLkxExcAujAvRGxUsEATFuBATBb0RL0zU38BCEGyxu7u7u3MeWRu322+f/RXfGTh7wYHDt2dmzbyzZq13rZlpTHGZNsXXzxiAsQVMcQTGR2CKG8DYCdY5AjsDFwJLdWg9fwHPAgcCz7WptyoAMwKfA/O1OYkKY90DbFWh/cimVQFYDPgoRp0T+LFAgyDNM1Lz/xvMAcw6pN8iwEOhe4kaYw/tUhWAxYEPYzQn/FObkxkYawZgW2AfYH1gNeAP4FHgYeAy4Omm+psAMDvgbh8FzF1hIncA/k0kGwIXAWuMaHcLcDjwXgX9/2naBIDZAB3itRWVvwysMkGf/YFLgJmT03sDuAC4HXg7vq0I7BILXwD4FNghfXuy4jz+ad4EAM+rZnoIMFcF5ffFeS7qsh1wW4x7ZjL5E4Ffh4w9P3BpbMKXwDrAOxXm0QoAwyZXdR62nxd4LYXYhYGT0vE6bcQgawPPJ2u6BtgNENgtqipuYgGzAL9VVThBe3f71BTm7o1QZ+zvlx2BT4DHgeXDUk4A7kyO8iVg0eQct4/jUnpaTQDwjP5eWtPohq8CK6Sd3Drt5N0DzWcC3gdejN+vDj/werKCPeP/s1L/K4EDRqv6t0UTAJyUYakNWTrOryRLrjE4rs72ZkCrWC4c4hUpDB8PfBDfdJgfA4bq0tIEAEPgn6U1TdxwM+D+cI6bFDSdHgtbOZGscxNhOn2gjeuQlBmZKvGTXADYJriBpu8R6Bdpt+xTGiwL9OitWgDSV0HRjQ5fl92YJgAYAmVnt1YkQtcnsz10YIKrR7KjH1hp4DfbmnxJdtS5TDBDnWFPpN7fBDPVAkpLEwDsq7m6M+5KWZHU6K37xf6fRSj0jL/V96PhzXO+X3zT4zuGDLQne6TNuC7mUilZqguAzsjdUCZKYopA0TwHQ5ztrgL2TdZ0DnBcX8e7ghA9EN8OC4p8RF8bN0EOcHQ6BueV3Qnb1QVA56cTbFPWBJ4K5rd5JD1lxpeJXhwWpPV8X6ZTr01OADgnd/+YCGc7JZr7xIjF7AVcHmn03jXyktoWYJyWB7Qt+oIbEttz8abaZwPnA18MKHKnZY4HhxWfkn4/uc5k6lqADNDJmo05kUqed8hE9Q0uwrFldUeGnxHsx8IxmoBJg3tpsuZ+bKTOddZf2wLMAcwFdgcMa23JpsCDMZhFEI/DrkFw+nWY/Wn6kqJ3myivawFmge6Gx8AQZCbXVAyDNxZECIHeMkKfC5c1vtIWC20KQNNFl+2/ZBAhGWEWNcFfCsyy7GLqtLMEr6lnA8DPgDXBrqSXLWYDgCFKz+8RMpExAWkqFjukvUUi/5ceZwOAqaf3AhYnb2q68r7+G6UC5yMF4y0LvJkjAJahLF62cRy+DS7/XQEAEh8LHtlYwA8VK8FNjUTyY8E0GwBkYFUuQ5oCYK3QWkE2AGimde7/6gLhZYjkJxsAPK9tsL+ygFgLtBCSHQDrRgm7jeNgxrdBePtBYLxKsySeDQDW3yxWrhcAVLkaG7br8nwTIMPdoFgEfSEnAExd2yA/ZY+AxVdfhmRjAZagrQV0Jb2qcTYAaK4LdrX6KIA8k5MFdA3AWlEwzcYC9NgLxY3sGS2VxHSsVoCKqLBX4T6AyAYALzG9x+8qGfLxgxXibACwfOXLLdNhHzK1QYp86uLbgCIx3FoYzQYAJ2sm2JXID3wdNmUBkCFaJ8gGAKs3PmToSiyUZPVQsvJLjIZIbRz3BZNuAb2nsjpBd2WYWDKzclxVZJhF4jW8t8OTDsCUfyzt7nhx6YsNS9Vdie8JpMIHTfZz+a4W3JmeqldjnU2sK0VjALpCOlc9YwvIdWe6mtfYArpCOlc9fwNKizJQMIdpiAAAAABJRU5ErkJggg==";
   gradesImage.style.width = "20px";
   return gradesImage;
-}
+};
 
 // Creates an eye icon for toggling visibility of course items
-function createEyeIcon(
+const createEyeIcon = (
   courseItem,
   courseName,
   visibleCourseList,
   hiddenCourseList
-) {
+) => {
   const eyeIcon = document.createElement("img");
   eyeIcon.className = "eye-icon";
   eyeIcon.src = chrome.runtime.getURL(
@@ -622,7 +617,7 @@ function createEyeIcon(
       : "assets/eye_off.png"
   );
 
-  eyeIcon.onclick = function () {
+  eyeIcon.onclick = () => {
     const currentlyHidden =
       eyeIcon.src === chrome.runtime.getURL("assets/eye_on.png");
     if (currentlyHidden) {
@@ -639,10 +634,10 @@ function createEyeIcon(
   };
 
   courseItem.firstChild.appendChild(eyeIcon);
-}
+};
 
 // Handles scroll events to update the position of the scrolling menu
-function scrollListener() {
+const scrollListener = () => {
   const scrollingMenu = document.querySelector(".scrolling-menu");
   const pageNavbar = document.querySelector("#page-navbar");
 
@@ -671,15 +666,15 @@ function scrollListener() {
   setTimeout(() => {
     document.querySelector(".scrolling-menu").style.opacity = 1;
   }, 150);
-}
+};
 
 // Removes the scroll event listener from the document
-function removeScrollEventListener() {
+const removeScrollEventListener = () => {
   document.removeEventListener("scroll", scrollListener);
-}
+};
 
 // Updates the position of the scrolling menu based on the current scroll position
-// function updateScrollingMenuPosition(scrollingMenu) {
+// const updateScrollingMenuPosition = (scrollingMenu) => {
 //   if (!scrollingMenu) return;
 
 //   scrollingMenu.style.top = "70px";
@@ -688,7 +683,7 @@ function removeScrollEventListener() {
 //   }, 150);
 // }
 
-function toggleSection(section) {
+const toggleSection = (section) => {
   const grandParent = section.parentElement.parentElement;
   const parentElement = section.parentElement;
   const sectionNum = section.dataset.number;
@@ -717,9 +712,9 @@ function toggleSection(section) {
     parentElement.setAttribute("aria-expanded", "true");
     sectionContent.classList.add("sectionopen");
   }
-}
+};
 
-function fetchPanoptoContent() {
+const fetchPanoptoContent = () => {
   try {
     const sesskey = document
       .querySelectorAll(".logininfo a")[1]
@@ -749,7 +744,7 @@ function fetchPanoptoContent() {
         },
         referrer: window.location.href,
         referrerPolicy: "strict-origin-when-cross-origin",
-        body: "sesskey=" + sesskey + "&courseid=" + parseInt(courseid),
+        body: `sesskey=${sesskey}&courseid=${parseInt(courseid)}`,
         method: "POST",
         mode: "cors",
         credentials: "include",
@@ -760,8 +755,8 @@ function fetchPanoptoContent() {
         document
           .getElementById("showAllToggle")
           .addEventListener("click", () => {
-            var showAllToggle = document.getElementById("showAllToggle");
-            var hiddenLecturesDiv =
+            const showAllToggle = document.getElementById("showAllToggle");
+            const hiddenLecturesDiv =
               document.getElementById("hiddenLecturesDiv");
             if (hiddenLecturesDiv.style.display == "block") {
               hiddenLecturesDiv.style.display = "none";
@@ -776,4 +771,8 @@ function fetchPanoptoContent() {
   } catch (e) {
     console.log(e);
   }
-}
+};
+
+document.readyState === "loading"
+  ? document.addEventListener("DOMContentLoaded", initMoodle)
+  : initMoodle();

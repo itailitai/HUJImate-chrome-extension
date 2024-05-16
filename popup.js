@@ -1,9 +1,9 @@
 // Check if JWT token is present in local storage
-function getJwtToken(callback) {
+const getJwtToken = (callback) => {
   chrome.storage.local.get(["jwtToken"], (result) => {
     callback(result.jwtToken);
   });
-}
+};
 
 // Update the message and color based on JWT token presence
 getJwtToken((token) => {
@@ -36,7 +36,7 @@ getJwtToken((token) => {
 });
 
 // Function to refresh the moodle tabs
-function refreshTabWithUrl() {
+const refreshTabWithUrl = () => {
   const targetUrl = "moodle4.cs.huji.ac.il";
   chrome.tabs.query({}, (tabs) => {
     for (let tab of tabs) {
@@ -45,7 +45,7 @@ function refreshTabWithUrl() {
       }
     }
   });
-}
+};
 
 document.addEventListener("DOMContentLoaded", function () {
   const cssToggle = document.getElementById("cssToggle");
