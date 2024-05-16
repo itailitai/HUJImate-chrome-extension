@@ -1,57 +1,81 @@
 let isScrolling = false;
 let activeCSS = false;
 let replacedHeader = false;
+let currentMoodleYear = null;
+const extractMoodleYear = (urlString) => {
+  try {
+    return new URL(urlString).pathname.split("/")[1];
+  } catch (error) {
+    console.error("Error extracting Moodle year:", error);
+    return null;
+  }
+};
 
 const getStorageValue = (key) => {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get([key], (result) => {
-      resolve(result[key]);
-    });
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get([key], (result) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(result[key]);
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 
 const clickEventHandler = (e) => {
-  const parsedUrl = new URL(window.location.href);
-  const target =
-    e.target.tagName === "A" || e.target.parentElement.tagName === "A"
-      ? e.target.tagName === "A"
-        ? e.target
-        : e.target.parentElement
-      : null;
-  if (!target) {
-    if (e.target.classList.contains("sectionname")) {
-      toggleSection(e.target);
-      return;
-    } else {
+  try {
+    const parsedUrl = new URL(window.location.href);
+    const target =
+      e.target.tagName === "A" || e.target.parentElement.tagName === "A"
+        ? e.target.tagName === "A"
+          ? e.target
+          : e.target.parentElement
+        : null;
+
+    if (!target) {
+      if (e.target.classList.contains("sectionname")) {
+        toggleSection(e.target);
+        return;
+      } else {
+        return;
+      }
+    }
+
+    e.preventDefault();
+    const url = target.href;
+
+    if (
+      !url.includes("moodle4.cs.huji.ac.il") ||
+      url.includes("pluginfile.php")
+    ) {
+      window.open(url, "_blank");
       return;
     }
+
+    if (
+      url.includes("/resource/view.php") ||
+      url.includes("/login/logout") ||
+      (parsedUrl.hostname === "moodle4.cs.huji.ac.il" &&
+        parsedUrl.pathname ===
+          "/" + currentMoodleYear + "/mod/assign/view.php" &&
+        parsedUrl.searchParams.get("action") === "editsubmission" &&
+        !isNaN(parsedUrl.searchParams.get("id")))
+    ) {
+      window.open(url, "_self");
+      return;
+    }
+
+    if (window.location.href.split("#")[0] === url.split("#")[0]) return;
+
+    showLoadingScreen(true, fetchAndReplaceContent(url));
+  } catch (error) {
+    console.error("Error in clickEventHandler:", error);
   }
-  e.preventDefault();
-  const url = target.href;
-
-  if (
-    !url.includes("moodle4.cs.huji.ac.il") ||
-    url.includes("pluginfile.php")
-  ) {
-    window.open(url, "_blank");
-    return;
-  }
-
-  if (
-    url.includes("/resource/view.php") ||
-    url.includes("/login/logout") ||
-    (parsedUrl.hostname === "moodle4.cs.huji.ac.il" &&
-      parsedUrl.pathname === "/hu23/mod/assign/view.php" &&
-      parsedUrl.searchParams.get("action") === "editsubmission" &&
-      !isNaN(parsedUrl.searchParams.get("id")))
-  ) {
-    window.open(url, "_self");
-    return;
-  }
-
-  if (window.location.href.split("#")[0] === url.split("#")[0]) return;
-
-  showLoadingScreen(true, fetchAndReplaceContent(url));
 };
 
 const fetchAndReplaceContent = (url) => {
@@ -95,111 +119,123 @@ const fetchAndReplaceContent = (url) => {
 };
 
 const initMoodle = async () => {
-  showLoadingScreen(false, false, true);
-  const darkModeEnabled = await getStorageValue("darkModeEnabled");
-  const ajaxEnabled = await getStorageValue("ajaxEnabled");
-  const moodleCssEnabled = await getStorageValue("moodleCssEnabled");
-  if (ajaxEnabled === false) {
-    if (moodleCssEnabled) {
-      document.querySelector("html").setAttribute("hujinsight", "true");
-      activeCSS = true;
-      if (darkModeEnabled) {
-        document.querySelector("html").setAttribute("darkmode", "true");
-      }
-      replaceImages(document);
-      createScrollingMenu();
-      setTimeout(() => {
-        scrollListener();
-      }, 150);
+  try {
+    showLoadingScreen(false, false, true);
+    currentMoodleYear = extractMoodleYear(window.location.href);
+    const [darkModeEnabled, ajaxEnabled, moodleCssEnabled] = await Promise.all([
+      getStorageValue("darkModeEnabled"),
+      getStorageValue("ajaxEnabled"),
+      getStorageValue("moodleCssEnabled"),
+    ]);
+
+    if (ajaxEnabled === false) {
+      handleNonAjaxMode(darkModeEnabled, moodleCssEnabled);
+      return;
     }
 
+    handleCssMode(darkModeEnabled, moodleCssEnabled);
+    removeWelcomeMessage();
     hideLoadingScreen(150);
-    return; // Return from initMoodle if ajaxEnabled is false
-  }
 
-  if (moodleCssEnabled !== false) {
-    document.querySelector("html").setAttribute("hujinsight", "true");
-    activeCSS = true;
-    if (darkModeEnabled) {
-      document.querySelector("html").setAttribute("darkmode", "true");
+    const parsedUrl = new URL(window.location.href);
+    if (shouldHandleDndSubmission(parsedUrl)) {
+      await handleDndSubmission(parsedUrl);
+    } else {
+      handleDefaultBehavior();
     }
+  } catch (error) {
+    console.error("An error occurred during Moodle initialization:", error);
+    hideLoadingScreen(150); // Ensure loading screen is hidden even if an error occurs
   }
+};
 
+const handleNonAjaxMode = (darkModeEnabled, moodleCssEnabled) => {
+  if (moodleCssEnabled) {
+    enableMoodleCss(darkModeEnabled);
+    replaceImages(document);
+    createScrollingMenu();
+    setTimeout(() => scrollListener(), 150);
+  }
+  hideLoadingScreen(150);
+};
+
+const handleCssMode = (darkModeEnabled, moodleCssEnabled) => {
+  if (moodleCssEnabled !== false) {
+    enableMoodleCss(darkModeEnabled);
+  }
+};
+
+const enableMoodleCss = (darkModeEnabled) => {
+  document.querySelector("html").setAttribute("hujinsight", "true");
+  activeCSS = true;
+  if (darkModeEnabled) {
+    document.querySelector("html").setAttribute("darkmode", "true");
+  }
+};
+
+const removeWelcomeMessage = () => {
   const welcomeMessage = document.querySelector("#page-header > div > h2");
   if (welcomeMessage) {
     welcomeMessage.remove();
   }
+};
 
-  hideLoadingScreen(150);
-
-  const parsedUrl = new URL(window.location.href);
-  if (
+const shouldHandleDndSubmission = (parsedUrl) => {
+  return (
     parsedUrl.hostname === "moodle4.cs.huji.ac.il" &&
-    parsedUrl.pathname === "/hu23/mod/assign/view.php" &&
+    parsedUrl.pathname === `/${currentMoodleYear}/mod/assign/view.php` &&
     parsedUrl.searchParams.get("action") === "editsubmission" &&
     !isNaN(parsedUrl.searchParams.get("id"))
-  ) {
-    showLoadingScreen();
-    // Function to be called when the element appears
-    const onDndSupportedElementFound = () => {
-      const element = document.querySelector(".dndsupported");
-      if (element) {
-        document.addEventListener("click", clickEventHandler);
-        window.addEventListener("popstate", () => window.location.reload());
+  );
+};
 
-        if (activeCSS) {
-          replaceImages(document);
-          const scrollingMenu = createScrollingMenu();
-          setTimeout(() => {
-            scrollListener();
-          }, 150);
-        }
-        hideLoadingScreen(250);
-      }
-    };
+const handleDndSubmission = async (parsedUrl) => {
+  showLoadingScreen();
+  const onDndSupportedElementFound = () => {
+    const element = document.querySelector(".dndsupported");
+    if (element) {
+      document.addEventListener("click", clickEventHandler);
+      window.addEventListener("popstate", () => window.location.reload());
 
-    // Create a MutationObserver to watch for the element
-    const observer = new MutationObserver((mutationsList, observer) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === "childList") {
-          const element = document.querySelector(".dndsupported");
-          if (element) {
-            setTimeout(() => {
-              onDndSupportedElementFound();
-            }, 500);
-            observer.disconnect(); // Stop observing once the element is found
-
-            break;
-          }
-        }
-      }
-    });
-
-    // Start observing the document for changes
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    // Check if the element is already present when the script runs
-    onDndSupportedElementFound();
-  } else {
-    document.addEventListener("click", clickEventHandler);
-    window.addEventListener("popstate", () => window.location.reload());
-    chrome.storage.sync.get(["moodleCssEnabled"], (result) => {
-      if (result.moodleCssEnabled !== false) {
-        addFontsToHead();
+      if (activeCSS) {
         replaceImages(document);
-        const scrollingMenu = createScrollingMenu();
-        fetchPanoptoContent();
-        setTimeout(() => {
-          scrollListener();
-        }, 150);
+        createScrollingMenu();
+        setTimeout(() => scrollListener(), 150);
       }
-    });
+      hideLoadingScreen(250);
+    }
+  };
 
-    hideLoadingScreen(250);
-  }
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList") {
+        const element = document.querySelector(".dndsupported");
+        if (element) {
+          setTimeout(onDndSupportedElementFound, 500);
+          observer.disconnect(); // Stop observing once the element is found
+          break;
+        }
+      }
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+  onDndSupportedElementFound();
+};
+
+const handleDefaultBehavior = () => {
+  document.addEventListener("click", clickEventHandler);
+  window.addEventListener("popstate", () => window.location.reload());
+  chrome.storage.sync.get(["moodleCssEnabled"], (result) => {
+    if (result.moodleCssEnabled !== false) {
+      addFontsToHead();
+      replaceImages(document);
+      const scrollingMenu = createScrollingMenu();
+      fetchPanoptoContent();
+      setTimeout(() => scrollListener(), 150);
+    }
+  });
+  hideLoadingScreen(250);
 };
 
 const addFontsToHead = () => {
@@ -223,7 +259,7 @@ const replaceImages = (htmlDocument) => {
   const headers = htmlDocument.querySelectorAll(".page-header-headings");
   if (!replacedHeader) {
     headers.forEach((header) => {
-      header.innerHTML = `<a style="text-decoration:none" href="https://moodle4.cs.huji.ac.il/hu23/"><img src="${chrome.runtime.getURL(
+      header.innerHTML = `<a style="text-decoration:none" href="https://moodle4.cs.huji.ac.il/${currentMoodleYear}/"><img src="${chrome.runtime.getURL(
         "assets/moodlelogo.png"
       )}" style="width:300px; padding-bottom: 15px; margin-top: 15px;" alt="Page Header"></a>`;
       header.style.visibility = "visible";
@@ -441,8 +477,11 @@ const createScrollingMenu = () => {
 
 // Extracts the appropriate container for the scrolling menu based on the URL
 const getMenuContainer = () => {
-  return window.location.href === "https://moodle4.cs.huji.ac.il/hu23/" ||
-    window.location.href.includes("https://moodle4.cs.huji.ac.il/hu23/?lang=")
+  return window.location.href ===
+    "https://moodle4.cs.huji.ac.il/" + currentMoodleYear + "/" ||
+    window.location.href.includes(
+      "https://moodle4.cs.huji.ac.il/" + currentMoodleYear + "/?lang="
+    )
     ? document.querySelector(".columnleft")
     : document.getElementById("frame-column");
 };
@@ -583,7 +622,7 @@ const createSubMenu = (courseUrl) => {
 const createGradesLink = (courseUrl) => {
   const gradesLink = document.createElement("a");
   const courseId = courseUrl.split("id=")[1];
-  gradesLink.href = `https://moodle4.cs.huji.ac.il/hu23/grade/report/user/index.php?id=${courseId}`;
+  gradesLink.href = `https://moodle4.cs.huji.ac.il/${currentMoodleYear}/grade/report/user/index.php?id=${courseId}`;
   gradesLink.textContent =
     document.querySelector("html").getAttribute("lang") === "he"
       ? "ציונים"
@@ -722,7 +761,9 @@ const fetchPanoptoContent = () => {
       .getAttribute("courseid");
     //sesskey=Gv822kcEBQ&courseid=67594
     fetch(
-      "https://moodle4.cs.huji.ac.il/hu23/blocks/panopto/panopto_content.php",
+      "https://moodle4.cs.huji.ac.il/" +
+        currentMoodleYear +
+        "/blocks/panopto/panopto_content.php",
       {
         headers: {
           accept: "*/*",
