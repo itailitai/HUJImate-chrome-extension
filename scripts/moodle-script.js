@@ -393,8 +393,6 @@ const extractUniqueCourseLinks = () => {
       link.href.includes("/course/view.php") &&
       /^[0-9]/.test(link.innerHTML)
     ) {
-      console.log(link.innerHTML);
-      console.log(link);
       const url = link.href.split("#")[0];
       uniqueUrls.add(url);
       coursesDict[link.innerHTML] = url;
@@ -768,9 +766,7 @@ const fetchPanoptoContent = () => {
           });
       });
     });
-  } catch (e) {
-    console.log(e);
-  }
+  } catch (e) {}
 };
 
 document.readyState === "loading"
