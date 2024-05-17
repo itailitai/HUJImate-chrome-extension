@@ -109,6 +109,62 @@ html[hujinsight="true"] input[type="submit"] {
   border: none !important;
 }
 
+html[hujinsight="true"] .btn-primary:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
+html[hujinsight="true"] #loginbtn {
+  padding: 0.5em 2em;
+  background: #1d90f5 !important;
+  border-radius: 1.2em;
+  color: white !important;
+  border: none !important;
+}
+
+html[hujinsight="true"] .loginform .form-input {
+  margin-bottom: 1em;
+}
+
+html[hujinsight="true"] .loginform .form-label {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  line-height: 35px;
+  color: #363636;
+}
+
+html[hujinsight="true"] .loginsub input[type="text"],
+html[hujinsight="true"] .loginsub input[type="password"] {
+  background: #e4e7f1 !important;
+  border: none;
+  border-radius: 0.6em;
+  transition: 0.5s ease all;
+  font-weight: bold;
+}
+
+html[hujinsight="true"] .loginpanel h2 {
+  font-weight: bold;
+}
+
+html[hujinsight="true"] .loginpanel {
+  background: white;
+
+  margin: 2em 5em;
+  padding: 2em;
+  border-radius: 2em;
+}
+
+html[hujinsight="true"] .loginsub input[type="text"]:focus,
+html[hujinsight="true"] .loginsub input[type="password"]:focus {
+  box-shadow: 0 0 8px 0rem rgb(0 0 0 / 15%);
+  border: 1px solid #1d90f5 !important;
+  background: white !important;
+}
+
+html[hujinsight="true"] .loginsub hr {
+  display: none;
+}
+
 html[hujinsight="true"]
   .maincalendar
   .calendarmonth
