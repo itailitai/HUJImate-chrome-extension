@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HUJImate: HUJI Moodle Enhancer & HUJInsight Sync",
-  "version": "1.0",
+  "version": "1.0.1.1",
   "permissions": ["scripting", "storage", "tabs"],
   "icons": {
     "16": "icon16.png",

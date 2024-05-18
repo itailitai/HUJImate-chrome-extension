@@ -13,13 +13,13 @@ const setupToken = async () => {
   if (token) {
     chrome.storage.local.get(["jwtToken"], (result) => {
       if (result.jwtToken !== token || !result.jwtToken) {
+        chrome.runtime.sendMessage({ action: "saveToken", token: token });
         // show success popup
         setTimeout(() => {
           createSuccessModal();
         }, 500);
       }
     });
-    chrome.runtime.sendMessage({ action: "saveToken", token: token });
   }
 };
 

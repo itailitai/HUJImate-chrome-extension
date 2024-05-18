@@ -544,9 +544,9 @@ const hujinsight = (token) => {
           if (error instanceof ForbiddenError) {
             // Handle ForbiddenError specifically
             removeLoadingOverlay(
-              "הגישה ל-HUJInsight אסורה עם הטוקן הנוכחי. אנא הסר את הקיצור מהמועדפים והוסף מחדש."
+              "נראה כי אינך מחובר/ת ל-HUJInsight דרך התוסף, נא וודאו בהגדרות התוסף שהינכם מחוברים."
             );
-            chrome.storage.local.remove("jwtToken");
+            chrome.runtime.sendMessage({ action: "loggedOut", token: token });
             return; // Stop further execution for this URL
           }
           console.error(`Error processing URL: ${url}`, error);
