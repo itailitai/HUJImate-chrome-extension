@@ -83,8 +83,8 @@ html[hujinsight="true"] .card.mb-3 {
   border: none !important;
 }
 
-.year23 .block,
-.year23 .card-body.p-3,
+html[hujinsight="true"] .year23 .block,
+html[hujinsight="true"] .year23 .card-body.p-3,
 html[hujinsight="true"] .year23 .card-title.d-inline {
   background-color: #ffffff !important;
   border-radius: 1em;
@@ -447,7 +447,7 @@ html[hujinsight="true"] .blur {
   display: none;
 }
 
-.forumpost,
+html[hujinsight="true"] .forumpost,
 html[hujinsight="true"] .forumng-post {
   background-color: #fff !important;
   border-radius: 1.2em !important;
@@ -617,7 +617,7 @@ html[hujinsight="true"] a:not([class]):focus {
 }
 
 /* Styles for the color picker */
-.color-picker {
+html[hujinsight="true"] .color-picker {
   margin-left: 0px;
   width: 25px;
   height: 25px;
@@ -636,25 +636,25 @@ html[hujinsight="true"] a:not([class]):focus {
   transition: 0.25s ease all;
 }
 
-.color-picker:hover {
+html[hujinsight="true"] .color-picker:hover {
   opacity: 1;
   transform: scale(1.1);
 }
 
 /* Custom styles for color picker in WebKit browsers */
-.color-picker::-webkit-color-swatch-wrapper {
+html[hujinsight="true"] .color-picker::-webkit-color-swatch-wrapper {
   padding: 0;
   border-radius: 3px;
 }
 
-.color-picker::-webkit-color-swatch {
+html[hujinsight="true"] .color-picker::-webkit-color-swatch {
   border: none;
   border-radius: 3px;
   background: none !important;
 }
 
 /* Custom styles for color picker in Mozilla browsers */
-.color-picker::-moz-color-swatch {
+html[hujinsight="true"] .color-picker::-moz-color-swatch {
   border: none;
   border-radius: 3px;
   background: none;
