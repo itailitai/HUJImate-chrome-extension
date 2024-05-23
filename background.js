@@ -1,6 +1,5 @@
-// This script runs in the background and can listen to browser events
 chrome.runtime.onInstalled.addListener(() => {
-  setLoggedOutBadge();
+  initializeBadgeState();
   chrome.storage.sync.set({
     moodleCssEnabled: true,
     ajaxEnabled: true,
@@ -9,7 +8,21 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
 });
 
-// Listen for messages from the content script
+// Initialize badge state on startup
+chrome.runtime.onStartup.addListener(() => {
+  initializeBadgeState();
+});
+
+function initializeBadgeState() {
+  chrome.storage.local.get("jwtToken", (result) => {
+    if (result.jwtToken) {
+      setLoggedInBadge();
+    } else {
+      setLoggedOutBadge();
+    }
+  });
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "saveToken") {
     const token = request.token;

@@ -88,6 +88,8 @@ const fetchAndReplaceContent = (url) => {
       const newDocument = parser.parseFromString(html, "text/html");
       document.querySelector("#page-content").innerHTML =
         newDocument.querySelector("#page-content").innerHTML;
+      document.querySelector("#page-content").classList =
+        newDocument.querySelector("#page-content").classList;
       document.querySelector("#page-navbar").innerHTML =
         newDocument.querySelector("#page-navbar").innerHTML;
       window.history.pushState(
@@ -161,7 +163,6 @@ const initMoodle = async () => {
 };
 
 const handleNonAjaxMode = (darkModeEnabled, moodleCssEnabled) => {
-  console.log(moodleCssEnabled);
   if (moodleCssEnabled) {
     enableMoodleCss(darkModeEnabled);
     replaceImages(document);
@@ -581,8 +582,13 @@ const createCourseListItem = (
   link.textContent = courseName;
   listContainer.appendChild(link);
   listItem.appendChild(listContainer);
-
-  if (window.location.href.includes(courseUrl)) {
+  console.log(courseUrl);
+  if (
+    document.querySelector('li.type_course[aria-expanded="true"]>p>a') &&
+    courseName.includes(
+      document.querySelector('li.type_course[aria-expanded="true"]>p>a').title
+    )
+  ) {
     link.classList.add("active");
     const subMenuList = createSubMenu(courseUrl);
     listItem.appendChild(subMenuList);
@@ -601,6 +607,9 @@ const adjustScrollingMenuPosition = (menuContainer) => {
 
 // Creates a submenu for course-specific actions and content
 const createSubMenu = (courseUrl) => {
+  const originalUL = document.querySelector(
+    'li.type_course[aria-expanded="true"] > ul'
+  );
   const subMenuList = document.createElement("div");
   subMenuList.className = "sub-menu";
   subMenuList.style.display = "block";
@@ -614,18 +623,43 @@ const createSubMenu = (courseUrl) => {
   gradesContainer.appendChild(gradesImage);
   gradesContainer.appendChild(gradesLink);
   subMenuList.appendChild(gradesContainer);
+  const URLwithoutFragment = window.location.href.split("#")[0];
+  if (URLwithoutFragment === courseUrl) {
+    document.querySelectorAll(".course-content h3").forEach((h3) => {
+      if (!h3.textContent.trim()) return;
+      const subMenuItem = document.createElement("span");
+      subMenuItem.textContent = h3.textContent;
+      subMenuItem.style.cursor = "pointer";
+      subMenuItem.onclick = () =>
+        h3.scrollIntoView({
+          behavior: "smooth",
+        });
+      subMenuList.appendChild(subMenuItem);
+    });
+  } else {
+    if (originalUL) {
+      const createSubMenuItems = (ulElement, parentElement, depth) => {
+        ulElement.querySelectorAll(":scope > li").forEach((li) => {
+          const subMenuItem = document.createElement("span");
+          const aTag = li.querySelector("a");
+          if (aTag && aTag.textContent.trim() !== "Grades") {
+            subMenuItem.textContent = aTag.textContent;
+            subMenuItem.style.cursor = "pointer";
+            subMenuItem.style.marginLeft = `${depth * 20}px`; // Adjust margin per level
+            subMenuItem.onclick = () => (window.location.href = aTag.href);
+            parentElement.appendChild(subMenuItem);
+          }
 
-  document.querySelectorAll(".course-content h3").forEach((h3) => {
-    if (!h3.textContent.trim()) return;
-    const subMenuItem = document.createElement("span");
-    subMenuItem.textContent = h3.textContent;
-    subMenuItem.style.cursor = "pointer";
-    subMenuItem.onclick = () =>
-      h3.scrollIntoView({
-        behavior: "smooth",
-      });
-    subMenuList.appendChild(subMenuItem);
-  });
+          const nestedUL = li.querySelector(":scope > ul");
+          if (nestedUL) {
+            createSubMenuItems(nestedUL, parentElement, depth + 1);
+          }
+        });
+      };
+
+      createSubMenuItems(originalUL, subMenuList, 0);
+    }
+  }
 
   return subMenuList;
 };

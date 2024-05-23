@@ -356,7 +356,7 @@ html[hujinsight="true"] .scrolling-menu .sub-menu {
   display: flex !important;
   margin-left: 2em;
   justify-content: center;
-  width: 100%;
+  width: auto;
   gap: 8px;
   flex-flow: column;
 }
