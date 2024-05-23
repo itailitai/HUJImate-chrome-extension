@@ -363,7 +363,7 @@ html[hujinsight="true"] .scrolling-menu .sub-menu {
 
 html[hujinsight="true"] .scrolling-menu li div span {
   transition: 0.25s ease all;
-  color: #2b3674 !important;
+  color: #2b3674;
   width: 95%;
 }
 
@@ -610,4 +610,53 @@ html[hujinsight="true"] a:not([class]):focus {
   outline: none !important;
   background: none !important;
   box-shadow: none !important;
+}
+
+/* Styles for the color picker */
+.color-picker {
+  margin-left: 0px;
+  width: 25px;
+  height: 25px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  border-radius: 3px;
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAthJREFUaEPtmUvITkEYx39fSbmVuy1WRLlTlFgo14iFUpTY2EkuoSjKNRsLK2woRRbkFkoIoSg7KQs75FJiQcp5ao6maebMnPPOvGe+emf31px5/r95bjPz9tHPR18/108PoG0P5uKBKcBOYAkwFvgMPABOAa+rNikHgG3AaWCARehfYI8CsXK0DbALOBEQhpuAC7Z5bQKEihfdn4AJwC8TIjXAJOASMF7t9FEloI74UvMa4Fq3Aa4CazWjEi5fgOMBYWNO2Q8caRugge7/n7QCMBl4DIzqRLn6djVwvdseEHvTgfsdQnwEJraRxOWGdQqxEbjYRhndDrwAnnbgiUPAQVcIpiyjO1QH/QmsAB4C01Q4jQ7MCala0omdIxVAKb403ATCK14WTwFgim8CESQ+BYBLvA3CldjPgPmBIRbVA7bjwe+iew40xPwAlnoS+2RRMneHQMQKIdvOy8FrJTDbcuLUc8LliVXFtzd8EDEAqsTLpUSGzTs+iL3AsdQALmHLgUeG8TOAXF70IeE0Ffig+sQdYJw68M0F3qcECNn50v5M4F5x8xppCDKrzQhglrpGyqnVO5qGUArxXrG2CU0AshHfpA9kJb4uQHbi6wBkKT4UQB6cpDPqQ2q4rVTOKY4Bd4HhxvzDwIFGWer5yJfE64ArxqEvG/E+DwicNBJ5EilHVuJ9ANIJn2vi/6i3S7mY6KPrYaMbrwqhzcB5bbI8UG3ISbzPA1uAs5rgy8B67XerO1/qqPLADOCVJlheireqt5lFwLluVhtXMaoCGKoeVQcFlr9kpbLKvgtgsLpMLA4UH3yHDVwveJoNYAhwC1gYsIqE1b7AN/6A5epPsQGI+GXGUi+LEvpEdd8xwDfgpkryN/XNxvvCBrAAuF08Sg1TZiSR5b+rr/HMxlvJlQMlxLucxfv6wDzgLfA93n7FX8l3mItvMfKKPYDIG1p7uZ4Ham9Z5A/+AS9wqTGGH9SmAAAAAElFTkSuQmCC")
+    no-repeat center center;
+  opacity: 0.8;
+  background-size: cover;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: 0.25s ease all;
+}
+
+.color-picker:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Custom styles for color picker in WebKit browsers */
+.color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 3px;
+}
+
+.color-picker::-webkit-color-swatch {
+  border: none;
+  border-radius: 3px;
+  background: none !important;
+}
+
+/* Custom styles for color picker in Mozilla browsers */
+.color-picker::-moz-color-swatch {
+  border: none;
+  border-radius: 3px;
+  background: none;
+}
+
+html[hujinsight="true"] li.light-text a,
+html[hujinsight="true"] li.light-text span {
+  color: #fff !important;
 }

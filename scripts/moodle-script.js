@@ -593,8 +593,17 @@ const createCourseListItem = (
     const subMenuList = createSubMenu(courseUrl);
     listItem.appendChild(subMenuList);
   }
-
-  createEyeIcon(listItem, courseName, visibleCourseList, hiddenCourseList);
+  const actionsContainer = document.createElement("div");
+  actionsContainer.style.display = "flex";
+  createEyeIcon(
+    listItem,
+    courseName,
+    visibleCourseList,
+    hiddenCourseList,
+    actionsContainer
+  );
+  createColorPicker(listItem, courseName, actionsContainer);
+  listContainer.appendChild(actionsContainer);
   return listItem;
 };
 
@@ -690,7 +699,8 @@ const createEyeIcon = (
   courseItem,
   courseName,
   visibleCourseList,
-  hiddenCourseList
+  hiddenCourseList,
+  actionsContainer
 ) => {
   const eyeIcon = document.createElement("img");
   eyeIcon.className = "eye-icon";
@@ -716,7 +726,47 @@ const createEyeIcon = (
     }
   };
 
-  courseItem.firstChild.appendChild(eyeIcon);
+  actionsContainer.appendChild(eyeIcon);
+};
+
+// Create color picker for each course
+const createColorPicker = (listItem, courseName, actionsContainer) => {
+  const colorPicker = document.createElement("input");
+  colorPicker.type = "color";
+  colorPicker.className = "color-picker";
+
+  // Retrieve and apply stored color
+  const storedColor = localStorage.getItem(`${courseName}_color`);
+  if (storedColor) {
+    listItem.style.backgroundColor = storedColor;
+    const textColor = textColorBasedOnBackground(storedColor);
+    colorPicker.value = storedColor;
+    listItem.className = textColor === "#fff" ? "light-text" : "dark-text";
+    actionsContainer.style.filter = textColor === "#fff" ? "invert(1)" : "none";
+  } else {
+    colorPicker.value = "#2b3674"; // Default color
+  }
+
+  colorPicker.oninput = (e) => {
+    const color = e.target.value;
+    listItem.style.backgroundColor = color;
+    localStorage.setItem(`${courseName}_color`, color);
+    const textColor = textColorBasedOnBackground(color);
+    colorPicker.value = color;
+    listItem.className = textColor === "#fff" ? "light-text" : "dark-text";
+    actionsContainer.style.filter = textColor === "#fff" ? "invert(1)" : "none";
+  };
+
+  actionsContainer.appendChild(colorPicker);
+};
+
+const textColorBasedOnBackground = (bgColor) => {
+  const hex = bgColor.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 125 ? "rgb(43, 54, 116)" : "#fff";
 };
 
 // Handles scroll events to update the position of the scrolling menu
