@@ -1,6 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HUJImate: HUJI Moodle Enhancer & HUJInsight Sync",
+  "description": "HUJImate is a browser extension that enhances the HUJI Moodle experience and syncs your HUJInsight data.",
   "version": "1.0.1.1",
   "permissions": ["scripting", "storage", "tabs"],
   "icons": {

@@ -1,6 +1,11 @@
 // This script runs in the background and can listen to browser events
 chrome.runtime.onInstalled.addListener(() => {
   setLoggedOutBadge();
+  chrome.storage.sync.set({
+    moodleCssEnabled: true,
+    ajaxEnabled: true,
+    darkModeEnabled: false,
+  });
   console.log("Extension installed");
 });
 

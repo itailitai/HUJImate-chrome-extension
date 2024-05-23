@@ -18,6 +18,7 @@ const getStorageValue = (key) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
+          console.log(key, result[key]);
           resolve(result[key]);
         }
       });
@@ -29,6 +30,7 @@ const getStorageValue = (key) => {
 
 const clickEventHandler = (e) => {
   try {
+    if (e.ctrlKey || e.metaKey) return;
     const parsedUrl = new URL(window.location.href);
     const target =
       e.target.tagName === "A" || e.target.parentElement.tagName === "A"
@@ -120,29 +122,38 @@ const fetchAndReplaceContent = (url) => {
 
 const initMoodle = async () => {
   try {
-    showLoadingScreen(false, false, true);
     currentMoodleYear = extractMoodleYear(window.location.href);
-    const [darkModeEnabled, ajaxEnabled, moodleCssEnabled] = await Promise.all([
-      getStorageValue("darkModeEnabled"),
-      getStorageValue("ajaxEnabled"),
-      getStorageValue("moodleCssEnabled"),
-    ]);
 
-    if (ajaxEnabled === false) {
-      handleNonAjaxMode(darkModeEnabled, moodleCssEnabled);
-      return;
-    }
+    // Fetch settings synchronously
+    chrome.storage.sync.get(
+      ["darkModeEnabled", "ajaxEnabled", "moodleCssEnabled"],
+      (result) => {
+        const darkModeEnabled = result.darkModeEnabled !== false;
+        const ajaxEnabled = result.ajaxEnabled !== false;
+        const moodleCssEnabled = result.moodleCssEnabled !== false;
 
-    handleCssMode(darkModeEnabled, moodleCssEnabled);
-    removeWelcomeMessage();
-    hideLoadingScreen(150);
+        if (moodleCssEnabled) {
+          enableMoodleCss(darkModeEnabled);
+        }
 
-    const parsedUrl = new URL(window.location.href);
-    if (shouldHandleDndSubmission(parsedUrl)) {
-      await handleDndSubmission(parsedUrl);
-    } else {
-      handleDefaultBehavior();
-    }
+        if (ajaxEnabled === false) {
+          handleNonAjaxMode(darkModeEnabled, moodleCssEnabled);
+          return;
+        }
+
+        showLoadingScreen(false, false, true);
+        handleCssMode(darkModeEnabled, moodleCssEnabled);
+        removeWelcomeMessage();
+        hideLoadingScreen(150);
+
+        const parsedUrl = new URL(window.location.href);
+        if (shouldHandleDndSubmission(parsedUrl)) {
+          handleDndSubmission(parsedUrl);
+        } else {
+          handleDefaultBehavior();
+        }
+      }
+    );
   } catch (error) {
     console.error("An error occurred during Moodle initialization:", error);
     hideLoadingScreen(150); // Ensure loading screen is hidden even if an error occurs
@@ -150,13 +161,14 @@ const initMoodle = async () => {
 };
 
 const handleNonAjaxMode = (darkModeEnabled, moodleCssEnabled) => {
+  console.log(moodleCssEnabled);
   if (moodleCssEnabled) {
     enableMoodleCss(darkModeEnabled);
     replaceImages(document);
     createScrollingMenu();
     setTimeout(() => scrollListener(), 150);
   }
-  hideLoadingScreen(150);
+  // hideLoadingScreen(150);
 };
 
 const handleCssMode = (darkModeEnabled, moodleCssEnabled) => {
