@@ -397,7 +397,11 @@ html[hujinsight="true"] .scrolling-menu a {
   margin-left: 20px;
 }
 
-html[hujinsight="true"] .scrolling-menu a::before {
+html[hujinsight="true"] .scrolling-menu a:hover {
+  color: #4318ff !important;
+}
+
+html[hujinsight="true"] .scrolling-menu .list-container > a::before {
   content: "";
   width: 8px;
   height: 8px;
@@ -659,4 +663,12 @@ html[hujinsight="true"] a:not([class]):focus {
 html[hujinsight="true"] li.light-text a,
 html[hujinsight="true"] li.light-text span {
   color: #fff !important;
+}
+
+html[hujinsight="true"] td.submissiongraded {
+  background: #d2f3d3;
+}
+
+html[hujinsight="true"] td.submissionnotgraded {
+  background: #fdf7d9;
 }

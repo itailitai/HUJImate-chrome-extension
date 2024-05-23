@@ -547,22 +547,34 @@ const createHiddenHeaderContainer = (hiddenHeader, showHiddenButton) => {
 
 // Appends course items to the appropriate lists and configures visibility toggles
 const appendCourseItems = (courses, visibleCourseList, hiddenCourseList) => {
+  let activeCourseItem = null;
+
   for (const courseName in courses) {
-    const listItem = createCourseListItem(
+    const { listItem, isActive } = createCourseListItem(
       courseName,
       courses[courseName],
       visibleCourseList,
       hiddenCourseList
     );
-    const storedVisibility = localStorage.getItem(courseName);
 
-    // add hidden class to course content if course is hidden
-    if (storedVisibility === "hidden") {
-      listItem.classList.add("hidden");
-      hiddenCourseList.appendChild(listItem);
+    // Store the active course item to prepend it later
+    if (isActive) {
+      activeCourseItem = listItem;
     } else {
-      visibleCourseList.appendChild(listItem);
+      // Append to the visible or hidden list based on stored visibility
+      const storedVisibility = localStorage.getItem(courseName);
+      if (storedVisibility === "hidden") {
+        listItem.classList.add("hidden");
+        hiddenCourseList.appendChild(listItem);
+      } else {
+        visibleCourseList.appendChild(listItem);
+      }
     }
+  }
+
+  // Prepend the active course item if it exists
+  if (activeCourseItem) {
+    visibleCourseList.prepend(activeCourseItem);
   }
 };
 
@@ -583,6 +595,8 @@ const createCourseListItem = (
   listContainer.appendChild(link);
   listItem.appendChild(listContainer);
   console.log(courseUrl);
+
+  let isActive = false;
   if (
     document.querySelector('li.type_course[aria-expanded="true"]>p>a') &&
     courseName.includes(
@@ -590,9 +604,11 @@ const createCourseListItem = (
     )
   ) {
     link.classList.add("active");
+    isActive = true;
     const subMenuList = createSubMenu(courseUrl);
     listItem.appendChild(subMenuList);
   }
+
   const actionsContainer = document.createElement("div");
   actionsContainer.style.display = "flex";
   createEyeIcon(
@@ -604,7 +620,7 @@ const createCourseListItem = (
   );
   createColorPicker(listItem, courseName, actionsContainer);
   listContainer.appendChild(actionsContainer);
-  return listItem;
+  return { listItem, isActive };
 };
 
 // Adjusts the position of the scrolling menu based on the container's position
@@ -652,10 +668,13 @@ const createSubMenu = (courseUrl) => {
           const subMenuItem = document.createElement("span");
           const aTag = li.querySelector("a");
           if (aTag && aTag.textContent.trim() !== "Grades") {
-            subMenuItem.textContent = aTag.textContent;
+            const link = document.createElement("a");
+            link.href = aTag.href;
+            link.textContent = aTag.textContent;
+            subMenuItem.appendChild(link);
             subMenuItem.style.cursor = "pointer";
             subMenuItem.style.marginLeft = `${depth * 20}px`; // Adjust margin per level
-            subMenuItem.onclick = () => (window.location.href = aTag.href);
+
             parentElement.appendChild(subMenuItem);
           }
 
