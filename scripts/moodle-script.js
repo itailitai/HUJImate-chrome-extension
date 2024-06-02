@@ -553,15 +553,19 @@ const appendCourseItems = (courses, visibleCourseList, hiddenCourseList) => {
       visibleCourseList,
       hiddenCourseList
     );
-    const storedVisibility = localStorage.getItem(courseName);
 
-    // add hidden class to course content if course is hidden
-    if (storedVisibility === "hidden") {
-      listItem.classList.add("hidden");
-      hiddenCourseList.appendChild(listItem);
-    } else {
-      visibleCourseList.appendChild(listItem);
-    }
+    // Retrieve the visibility state from Chrome storage
+    chrome.storage.sync.get(courseName, (result) => {
+      const storedVisibility = result[courseName];
+
+      // add hidden class to course content if course is hidden
+      if (storedVisibility === "hidden") {
+        listItem.classList.add("hidden");
+        hiddenCourseList.appendChild(listItem);
+      } else {
+        visibleCourseList.appendChild(listItem);
+      }
+    });
   }
 };
 
@@ -660,27 +664,30 @@ const createEyeIcon = (
 ) => {
   const eyeIcon = document.createElement("img");
   eyeIcon.className = "eye-icon";
-  eyeIcon.src = chrome.runtime.getURL(
-    localStorage.getItem(courseName) === "hidden"
-      ? "assets/eye_on.png"
-      : "assets/eye_off.png"
-  );
 
-  eyeIcon.onclick = () => {
-    const currentlyHidden =
-      eyeIcon.src === chrome.runtime.getURL("assets/eye_on.png");
-    if (currentlyHidden) {
-      visibleCourseList.appendChild(courseItem);
-      courseItem.classList.remove("hidden");
-      eyeIcon.src = chrome.runtime.getURL("assets/eye_off.png");
-      localStorage.setItem(courseName, "visible");
-    } else {
-      hiddenCourseList.appendChild(courseItem);
-      eyeIcon.src = chrome.runtime.getURL("assets/eye_on.png");
-      courseItem.classList.add("hidden");
-      localStorage.setItem(courseName, "hidden");
-    }
-  };
+  // Retrieve the visibility state from Chrome storage
+  chrome.storage.sync.get(courseName, (result) => {
+    const visibilityState = result[courseName] || "visible"; // Default to visible if not set
+    eyeIcon.src = chrome.runtime.getURL(
+      visibilityState === "hidden" ? "assets/eye_on.png" : "assets/eye_off.png"
+    );
+
+    eyeIcon.onclick = () => {
+      const currentlyHidden =
+        eyeIcon.src === chrome.runtime.getURL("assets/eye_on.png");
+      if (currentlyHidden) {
+        visibleCourseList.appendChild(courseItem);
+        courseItem.classList.remove("hidden");
+        eyeIcon.src = chrome.runtime.getURL("assets/eye_off.png");
+        chrome.storage.sync.set({ [courseName]: "visible" });
+      } else {
+        hiddenCourseList.appendChild(courseItem);
+        eyeIcon.src = chrome.runtime.getURL("assets/eye_on.png");
+        courseItem.classList.add("hidden");
+        chrome.storage.sync.set({ [courseName]: "hidden" });
+      }
+    };
+  });
 
   courseItem.firstChild.appendChild(eyeIcon);
 };
