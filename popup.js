@@ -12,6 +12,19 @@ getJwtToken((token) => {
     messageElement.textContent =
       "את/ה מחובר/ת למשתמש ה-HUJInsight שלך! ניתן לשתף ציונים מהמידע האישי.";
     messageElement.style.color = "green";
+    const button = document.createElement("button");
+    button.style.justifyContent = "center";
+    button.style.backgroundColor = "#83111e";
+    button.className = "share-button";
+    button.textContent = "שתף ציונים מהמידע האישי";
+    // go to huji on click
+    button.addEventListener("click", () => {
+      chrome.tabs.create({
+        url: "https://www.huji.ac.il/dataj/controller/stu",
+      });
+    });
+    // add button to popup
+    document.querySelector("p").after(button);
   } else {
     messageElement.textContent =
       "אינך מחובר/ת למשתמש ה-HUJInsight שלך. יש להתחבר על מנת לשתף ציונים.";

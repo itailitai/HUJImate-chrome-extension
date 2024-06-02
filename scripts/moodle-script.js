@@ -88,6 +88,8 @@ const fetchAndReplaceContent = (url) => {
       const newDocument = parser.parseFromString(html, "text/html");
       document.querySelector("#page-content").innerHTML =
         newDocument.querySelector("#page-content").innerHTML;
+      document.querySelector("#page-content").classList =
+        newDocument.querySelector("#page-content").classList;
       document.querySelector("#page-navbar").innerHTML =
         newDocument.querySelector("#page-navbar").innerHTML;
       window.history.pushState(
@@ -161,7 +163,6 @@ const initMoodle = async () => {
 };
 
 const handleNonAjaxMode = (darkModeEnabled, moodleCssEnabled) => {
-  console.log(moodleCssEnabled);
   if (moodleCssEnabled) {
     enableMoodleCss(darkModeEnabled);
     replaceImages(document);
@@ -546,8 +547,10 @@ const createHiddenHeaderContainer = (hiddenHeader, showHiddenButton) => {
 
 // Appends course items to the appropriate lists and configures visibility toggles
 const appendCourseItems = (courses, visibleCourseList, hiddenCourseList) => {
+  let activeCourseItem = null;
+
   for (const courseName in courses) {
-    const listItem = createCourseListItem(
+    const { listItem, isActive } = createCourseListItem(
       courseName,
       courses[courseName],
       visibleCourseList,
@@ -567,6 +570,11 @@ const appendCourseItems = (courses, visibleCourseList, hiddenCourseList) => {
       }
     });
   }
+
+  // Prepend the active course item if it exists
+  if (activeCourseItem) {
+    visibleCourseList.prepend(activeCourseItem);
+  }
 };
 
 // Creates a list item for a course with a link and visibility toggle
@@ -585,15 +593,33 @@ const createCourseListItem = (
   link.textContent = courseName;
   listContainer.appendChild(link);
   listItem.appendChild(listContainer);
+  console.log(courseUrl);
 
-  if (window.location.href.includes(courseUrl)) {
+  let isActive = false;
+  if (
+    document.querySelector('li.type_course[aria-expanded="true"]>p>a') &&
+    courseName.includes(
+      document.querySelector('li.type_course[aria-expanded="true"]>p>a').title
+    )
+  ) {
     link.classList.add("active");
+    isActive = true;
     const subMenuList = createSubMenu(courseUrl);
     listItem.appendChild(subMenuList);
   }
 
-  createEyeIcon(listItem, courseName, visibleCourseList, hiddenCourseList);
-  return listItem;
+  const actionsContainer = document.createElement("div");
+  actionsContainer.style.display = "flex";
+  createEyeIcon(
+    listItem,
+    courseName,
+    visibleCourseList,
+    hiddenCourseList,
+    actionsContainer
+  );
+  createColorPicker(listItem, courseName, actionsContainer);
+  listContainer.appendChild(actionsContainer);
+  return { listItem, isActive };
 };
 
 // Adjusts the position of the scrolling menu based on the container's position
@@ -605,6 +631,9 @@ const adjustScrollingMenuPosition = (menuContainer) => {
 
 // Creates a submenu for course-specific actions and content
 const createSubMenu = (courseUrl) => {
+  const originalUL = document.querySelector(
+    'li.type_course[aria-expanded="true"] > ul'
+  );
   const subMenuList = document.createElement("div");
   subMenuList.className = "sub-menu";
   subMenuList.style.display = "block";
@@ -618,18 +647,46 @@ const createSubMenu = (courseUrl) => {
   gradesContainer.appendChild(gradesImage);
   gradesContainer.appendChild(gradesLink);
   subMenuList.appendChild(gradesContainer);
+  const URLwithoutFragment = window.location.href.split("#")[0];
+  if (URLwithoutFragment === courseUrl) {
+    document.querySelectorAll(".course-content h3").forEach((h3) => {
+      if (!h3.textContent.trim()) return;
+      const subMenuItem = document.createElement("span");
+      subMenuItem.textContent = h3.textContent;
+      subMenuItem.style.cursor = "pointer";
+      subMenuItem.onclick = () =>
+        h3.scrollIntoView({
+          behavior: "smooth",
+        });
+      subMenuList.appendChild(subMenuItem);
+    });
+  } else {
+    if (originalUL) {
+      const createSubMenuItems = (ulElement, parentElement, depth) => {
+        ulElement.querySelectorAll(":scope > li").forEach((li) => {
+          const subMenuItem = document.createElement("span");
+          const aTag = li.querySelector("a");
+          if (aTag && aTag.textContent.trim() !== "Grades") {
+            const link = document.createElement("a");
+            link.href = aTag.href;
+            link.textContent = aTag.textContent;
+            subMenuItem.appendChild(link);
+            subMenuItem.style.cursor = "pointer";
+            subMenuItem.style.marginLeft = `${depth * 20}px`; // Adjust margin per level
 
-  document.querySelectorAll(".course-content h3").forEach((h3) => {
-    if (!h3.textContent.trim()) return;
-    const subMenuItem = document.createElement("span");
-    subMenuItem.textContent = h3.textContent;
-    subMenuItem.style.cursor = "pointer";
-    subMenuItem.onclick = () =>
-      h3.scrollIntoView({
-        behavior: "smooth",
-      });
-    subMenuList.appendChild(subMenuItem);
-  });
+            parentElement.appendChild(subMenuItem);
+          }
+
+          const nestedUL = li.querySelector(":scope > ul");
+          if (nestedUL) {
+            createSubMenuItems(nestedUL, parentElement, depth + 1);
+          }
+        });
+      };
+
+      createSubMenuItems(originalUL, subMenuList, 0);
+    }
+  }
 
   return subMenuList;
 };
@@ -660,7 +717,8 @@ const createEyeIcon = (
   courseItem,
   courseName,
   visibleCourseList,
-  hiddenCourseList
+  hiddenCourseList,
+  actionsContainer
 ) => {
   const eyeIcon = document.createElement("img");
   eyeIcon.className = "eye-icon";
@@ -689,7 +747,47 @@ const createEyeIcon = (
     };
   });
 
-  courseItem.firstChild.appendChild(eyeIcon);
+  actionsContainer.appendChild(eyeIcon);
+};
+
+// Create color picker for each course
+const createColorPicker = (listItem, courseName, actionsContainer) => {
+  const colorPicker = document.createElement("input");
+  colorPicker.type = "color";
+  colorPicker.className = "color-picker";
+
+  // Retrieve and apply stored color
+  const storedColor = localStorage.getItem(`${courseName}_color`);
+  if (storedColor) {
+    listItem.style.backgroundColor = storedColor;
+    const textColor = textColorBasedOnBackground(storedColor);
+    colorPicker.value = storedColor;
+    listItem.className = textColor === "#fff" ? "light-text" : "dark-text";
+    actionsContainer.style.filter = textColor === "#fff" ? "invert(1)" : "none";
+  } else {
+    colorPicker.value = "#2b3674"; // Default color
+  }
+
+  colorPicker.oninput = (e) => {
+    const color = e.target.value;
+    listItem.style.backgroundColor = color;
+    localStorage.setItem(`${courseName}_color`, color);
+    const textColor = textColorBasedOnBackground(color);
+    colorPicker.value = color;
+    listItem.className = textColor === "#fff" ? "light-text" : "dark-text";
+    actionsContainer.style.filter = textColor === "#fff" ? "invert(1)" : "none";
+  };
+
+  actionsContainer.appendChild(colorPicker);
+};
+
+const textColorBasedOnBackground = (bgColor) => {
+  const hex = bgColor.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 125 ? "rgb(43, 54, 116)" : "#fff";
 };
 
 // Handles scroll events to update the position of the scrolling menu
