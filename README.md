@@ -1,44 +1,39 @@
+# StudentInsight Chrome Extension
 
+StudentInsight is a browser extension that enables Hebrew University students to securely and anonymously share course statistics with their peers. This extension integrates with the university's grade portal (Orbit) to help students make informed decisions about their academic journey.
 
-# HUJImate Chrome Extension
-
-![HUJInsight Moodle](assets/moodlelogo.png)
-
-
-## Overview
-
-This Chrome Extension is designed to enhance the user experience on the HUJI moodle website. It also allows users to save their credentials when visiting HUJInsight, facilitating seamless integration for sharing courses via the HUJI Personal Information website.
+![StudentInsight Extension Screenshot](https://studentinsight.co.il/extension-screenshot.png)
 
 ## Features
 
-1. **Token Handling**: 
-   - Automatically retrieves and saves tokens when visiting the HUJInsight website.
-
-2. **Custom Button Integration**:
-   - Adds a button on the HUJI grades page to facilitate easy grade sharing.
-
-3. **Moodle Interaction**:
-   - Enhances the Moodle experience by dynamically fetching and replacing content, adding a custom scrolling menu for better navigation, and modernizing the UI.
-
-4. **Moodle Dark Mode**:
-   - Adds the dark mode option via the extension settings.
-
+- 📊 **Anonymous Grade Statistics**: Share course grade distributions while maintaining complete privacy
+- 🔒 **Secure Data Handling**: No data will be linked back to you.
+- 🎯 **Course Tracking**: Visual indicators show which courses have already been shared
+- 🚀 **Integration**: Seamlessly integrates with the Hebrew University's Orbit system
+- ⚡ **Real-time Updates**: Course statistics are updated almost instantly on StudentInsight when new data is shared
 
 ## Installation
 
-1. Clone or download the repository.
-2. Open Chrome and navigate to `chrome://extensions/`.
-3. Enable "Developer mode" by toggling the switch in the top right corner.
-4. Click on "Load unpacked" and select the folder containing the extension files.
+1. Visit the [Chrome Web Store](https://chromewebstore.google.com/detail/studentinsight/bdhmnmjakahnomammapgdgdkidnfbiia)
+2. Click "Add to Chrome"
+3. Sign in to your StudentInsight account at [studentinsight.co.il](https://studentinsight.co.il)
 
+## Usage
 
+1. Log in to your HUJI account on Orbit's personal info system.
+2. Click the "Share Statistics" button in the bottom left corner
+3. The extension will automatically process and share the data
+4. Green indicators will show which courses have been shared
+
+## Privacy & Security
+
+- No personal information is ever collected or transmitted
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and submit a pull request for any improvements or bug fixes.
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU AGPLv3 License - see the [LICENSE](LICENSE) file for details.
 
-Feel free to customize the README further to suit your specific needs.
