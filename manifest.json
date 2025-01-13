@@ -1,37 +1,38 @@
 {
   "manifest_version": 3,
-  "name": "HUJImate: HUJI Moodle Enhancer & HUJInsight Sync",
-  "description": "HUJImate is a browser extension that enhances the HUJI Moodle experience and syncs your HUJInsight data.",
-  "version": "1.0.2.1",
-  "permissions": ["scripting", "storage", "tabs"],
+  "name": "StudentInsight",
+  "description": "StudentInsight is a browser extension that lets students securely and anonymously share course statistics with their peers.",
+  "version": "1.1",
+  "permissions": ["storage", "tabs"],
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
   },
   "background": {
-    "service_worker": "background.js",
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
   },
+
   "content_scripts": [
     {
-      "matches": ["https://www.huji.ac.il/dataj/controller/*"],
+      "matches": ["https://orbitlive.huji.ac.il/*"],
       "js": ["contentScript.js"]
     },
     {
-      "matches": ["https://moodle4.cs.huji.ac.il/*"],
-      "js": ["scripts/moodle-script.js"],
-      "run_at": "document_start",
-
-      "css": ["assets/moodle-css.css", "assets/dark-moodle.css"]
+      "matches": ["https://orbitlive.huji.ac.il/StudentGradesList.aspx"],
+      "js": ["scripts/markSharedCourses.js"],
+      "run_at": "document_start"
     },
     {
-      "matches": ["https://hujinsight.com/*"],
+      "matches": ["https://studentinsight.co.il/*", "http://localhost:3000/*"],
       "js": ["scripts/hujinsight.js"]
     }
   ],
 
-  "host_permissions": ["https://*.hujinsight.com/*"],
+  "host_permissions": [
+    "https://*.studentinsight.co.il/*",
+    "https://orbitlive.huji.ac.il/*"
+  ],
 
   "action": {
     "default_popup": "popup.html",
@@ -40,19 +41,21 @@
       "48": "icon48.png",
       "128": "icon128.png"
     },
-    "default_title": "HUJImate - HUJI Moodle Enhancer & HUJInsight Sync"
+    "default_title": "StudentInsight"
   },
 
   "web_accessible_resources": [
     {
       "resources": [
-        "assets/moodlelogo.png",
-        "assets/loader.gif",
-        "assets/eye_on.png",
-        "assets/eye_off.png",
-        "assets/hujinsight.svg"
+        "assets/overlay.html",
+        "assets/overlay.js",
+        "assets/success-page.html",
+        "assets/success-page.js",
+        "assets/error-page.html",
+        "assets/error-auth.html",
+        "assets/ocr-loading-page.html"
       ],
-      "matches": ["https://moodle4.cs.huji.ac.il/*"]
+      "matches": ["https://orbitlive.huji.ac.il/*"]
     }
   ]
 }

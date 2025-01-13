@@ -1,3 +1,4 @@
+// background.js
 chrome.runtime.onInstalled.addListener(() => {
   initializeBadgeState();
   chrome.storage.sync.set({
@@ -26,15 +27,15 @@ function initializeBadgeState() {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "saveToken") {
     const token = request.token;
+    const name = request.name;
     setLoggedInBadge();
     // Save the token in chrome.storage
-    chrome.storage.local.set({ jwtToken: token }, () => {
-      console.log("JWT token saved.");
-    });
+    chrome.storage.local.set({ jwtToken: token, name: name });
   }
 
   if (request.action === "loggedOut") {
     chrome.storage.local.remove("jwtToken");
+    chrome.storage.local.remove("name");
     setLoggedOutBadge();
   }
 });

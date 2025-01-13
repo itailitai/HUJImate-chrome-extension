@@ -1,56 +1,67 @@
 // Check if JWT token is present in local storage
-const getJwtToken = (callback) => {
-  chrome.storage.local.get(["jwtToken"], (result) => {
-    callback(result.jwtToken);
+const getJwtTokenAndName = (callback) => {
+  chrome.storage.local.get(["jwtToken", "name"], (result) => {
+    callback(result.jwtToken, result.name);
   });
 };
 
-// Update the message and color based on JWT token presence
-getJwtToken((token) => {
-  const messageElement = document.querySelector("p");
-  if (token) {
-    messageElement.textContent =
-      "את/ה מחובר/ת למשתמש ה-HUJInsight שלך! ניתן לשתף ציונים מהמידע האישי.";
-    messageElement.style.color = "green";
-    const button = document.createElement("button");
-    button.style.justifyContent = "center";
-    button.style.backgroundColor = "#83111e";
-    button.className = "share-button";
-    button.textContent = "שתף ציונים מהמידע האישי";
-    // go to huji on click
-    button.addEventListener("click", () => {
-      chrome.tabs.create({
-        url: "https://www.huji.ac.il/dataj/controller/stu",
-      });
-    });
-    // add button to popup
-    document.querySelector("p").after(button);
-  } else {
-    messageElement.textContent =
-      "אינך מחובר/ת למשתמש ה-HUJInsight שלך. יש להתחבר על מנת לשתף ציונים.";
-    messageElement.style.color = "red";
-    // add button with image
-    const button = document.createElement("button");
-    button.className = "share-button";
-    button.textContent = "התחבר ל- HUJInsight";
-    // go to HUJInsight on click
-    button.addEventListener("click", () => {
-      chrome.tabs.create({ url: "https://hujinsight.com" });
-    });
+// Function to create a styled button
+const createStyledButton = (text, imageSrc, clickHandler) => {
+  const button = document.createElement("button");
+  button.className = "action-button";
+
+  if (imageSrc) {
     const img = document.createElement("img");
-    img.src = "assets/hujinsight.svg";
-    img.style.height = "30px";
-    img.style.width = "30px";
-    img.style.marginRight = "10px";
-    button.prepend(img);
-    // add button to popup
-    document.querySelector("p").after(button);
+    img.src = imageSrc;
+    img.alt = text;
+    button.appendChild(img);
+  }
+
+  button.appendChild(document.createTextNode(text));
+  button.addEventListener("click", clickHandler);
+  return button;
+};
+
+// Update the UI based on JWT token presence
+getJwtTokenAndName((token, name) => {
+  const authSection = document.querySelector(".auth-section");
+  console.log(token, name);
+  if (token) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "auth-message";
+    messageDiv.innerHTML = `<strong>שלום, ${name}!</strong><br>`;
+    messageDiv.innerHTML += "את/ה מחובר/ת למשתמש ה-StudentInsight שלך!";
+    messageDiv.style.color = "none";
+    const button = createStyledButton(
+      "שתף ציונים מהמידע האישי",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAABCJJREFUeF7tmlvIjlkUx3+fYw6ZmuRQNFMTqdEkUqJwoZzKMaFmImpqhOQCRbmQ442IHIrkAuFCxIWEppGZ5mIulBwjcopBiHEc+89Wej2Hvd9nP5/3ed9n1dcX39rrWev/rLX3f639NNHg0tTg8VMCUGZAgyNQlkCDJ0C5CZYlUJZA7SLQC+gK/JGni7VaAj8BfwLtgM3AfOBdHkDUKgArgGWfBXwImA78FxqEWgVgHzC1ItiTwETgSUgQahWA/cCUiEDPmdIYBdwOBULRAFDc14CRwOUQIBQRAMV9DxgN/JMVhKICoLifAZOB41lAKDIAivsV8AugPaMqKToACvotMBfYWg0C9QDAp7jXGp6wxBeErw1AF6Af8APQA+gMtAeG23/7xrMFmGezwmltcwPQERhrj7ERQE8nL/2UDgI/Ay9dljUXAEPN0fUbMM6+YRffsug4s8a8AVDAy4H+WaKpcq04griCOEOs5AXAAFPPm4BBVTofatlVW276HSmhAWgLrLbta8tQUWS0cxcYE8caQwLwHXAAGJjR4TyWPwb6ArcqjYcCQDv7buDbPLwPZHNlxYzhg9kQAIiFbQxkK1CskWZ2ArNDZ8Acu9mFADLP4GVbx/AXdDmL40UK/nczXBXxeh0qAzSu2luAtFe8h4FpwIuoFKsmA3obOvs30CnvnA1gXxuz6v5NKB7QwbCrv8xx92MA5/I2oY15gWGi/4dkgrvMTG5G3p5ntK/7g4XABhc7PiUwzLSpp12Meuo8BS6ZNvZf4JH9UTvcx9OO1DUhmmn3J6flrgC0sHUfoqm5ARyx9rSXXIi49YkbiycFVdWM0BWAWaZ33+EEabTSAzu308lxJq0urW7UvUCcC/ftnEGAeokLAJrQXAG6e1n+qHwHWANs97zW8smA6/ay5GIV/jlRYY2YtKP6iN74Ksu8Is/fFGOuAGS+KUrLgNb2BkadnqscNVdXv2a8vnIBQMexmjBtnlVLGgBifLqodBE5omvsPS7KGTMgkd35PD8NgGN2rJRm87x9G6rHEJKUAanszseBJAC6GRp5E2iVYlDcYJI9v32enaQbB4CmTUsdThFnP5IAUB1vS7Gk8hAzFAEJKZWM04vd+TiSBIC+yhifYEyb3YSkRsPHkQpdcfj19v+82Z3Pc+MAaGM2tIeAmp8oOWv76+c+D/PQ/cbMFgXw95banvBY66UaB8Bgy9iijIm36++Zjh8vL3NUjgNgkflCS5eNlaKJyhDL43N0q/lMxwGgs1xfZVXKYnO1ta753Mv/SXEAiPqKAn8up2zd5/K9Xv6hRj8hDgB9oamW9dMlh7os0U51XXUlSceg/qbRl0ZKYnqJo6WiopJGhYsal7PfJQDOUNWpYpkBdfpincMqM8AZqjpVLDOgTl+sc1gNnwHvAbvcqUEgZGVnAAAAAElFTkSuQmCC",
+      () =>
+        chrome.tabs.create({
+          url: "https://orbitlive.huji.ac.il/StudentGradesList.aspx",
+        })
+    );
+
+    authSection.appendChild(messageDiv);
+    authSection.appendChild(button);
+  } else {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "auth-message";
+    messageDiv.textContent = "יש להתחבר על מנת לשתף ציונים";
+    messageDiv.style.color = "#ff0000";
+    const button = createStyledButton(
+      "התחבר ל-StudentInsight",
+      "assets/hujinsight.png",
+      () => chrome.tabs.create({ url: "https://StudentInsight.co.il" })
+    );
+
+    authSection.appendChild(messageDiv);
+    authSection.appendChild(button);
   }
 });
 
 // Function to refresh the moodle tabs
 const refreshTabWithUrl = () => {
-  const targetUrl = "moodle4.cs.huji.ac.il";
+  const targetUrl = "https://moodle.huji.ac.il";
   chrome.tabs.query({}, (tabs) => {
     for (let tab of tabs) {
       if (tab.url && tab.url.includes(targetUrl)) {
@@ -60,61 +71,57 @@ const refreshTabWithUrl = () => {
   });
 };
 
-document.addEventListener("DOMContentLoaded", function () {
-  const cssToggle = document.getElementById("cssToggle");
-  const ajaxToggle = document.getElementById("ajaxToggle");
-  const darkModeToggle = document.getElementById("darkModeToggle");
+// Initialize toggle states and add event listeners
+// document.addEventListener("DOMContentLoaded", function () {
+//   const cssToggle = document.getElementById("cssToggle");
+//   const ajaxToggle = document.getElementById("ajaxToggle");
+//   const darkModeToggle = document.getElementById("darkModeToggle");
 
-  // Load the saved setting for CSS injection
-  chrome.storage.sync.get(["moodleCssEnabled"], (result) => {
-    cssToggle.checked = result.moodleCssEnabled !== false; // Default is true
+//   const initToggle = (
+//     toggle,
+//     storageKey,
+//     defaultValue = true,
+//     dependency = null
+//   ) => {
+//     chrome.storage.sync.get([storageKey], (result) => {
+//       toggle.checked = result[storageKey] !== false;
 
-    // Load dark mode setting only if CSS is enabled
-    if (cssToggle.checked) {
-      chrome.storage.sync.get(["darkModeEnabled"], (result) => {
-        darkModeToggle.checked = result.darkModeEnabled === true; // Default is true
-      });
-    } else {
-      darkModeToggle.disabled = true; // Disable dark mode toggle if CSS is not enabled
-    }
-  });
+//       if (dependency) {
+//         const dependentToggle = document.getElementById(dependency);
+//         if (!toggle.checked) {
+//           dependentToggle.checked = false;
+//           dependentToggle.disabled = true;
+//         }
+//       }
+//     });
+//   };
 
-  // Save the setting and refresh the current tab when CSS checkbox is changed
-  cssToggle.addEventListener("change", function () {
-    chrome.storage.sync.set({ moodleCssEnabled: cssToggle.checked }, () => {
-      refreshTabWithUrl(); // Refresh the current tab
+//   const handleToggleChange = (toggle, storageKey, dependency = null) => {
+//     toggle.addEventListener("change", function () {
+//       chrome.storage.sync.set({ [storageKey]: toggle.checked }, () => {
+//         refreshTabWithUrl();
 
-      // Enable/disable dark mode toggle based on CSS toggle state
-      if (cssToggle.checked) {
-        darkModeToggle.disabled = false;
-        // Load dark mode setting if CSS is enabled
-        chrome.storage.sync.get(["darkModeEnabled"], (result) => {
-          darkModeToggle.checked = result.darkModeEnabled === true;
-        });
-      } else {
-        darkModeToggle.checked = false;
-        darkModeToggle.disabled = true;
-        chrome.storage.sync.set({ darkModeEnabled: false });
-      }
-    });
-  });
+//         if (dependency) {
+//           const dependentToggle = document.getElementById(dependency);
+//           if (!toggle.checked) {
+//             dependentToggle.checked = false;
+//             dependentToggle.disabled = true;
+//             chrome.storage.sync.set({ [dependency]: false });
+//           } else {
+//             dependentToggle.disabled = false;
+//           }
+//         }
+//       });
+//     });
+//   };
 
-  // Load the saved setting for AJAX
-  chrome.storage.sync.get(["ajaxEnabled"], (result) => {
-    ajaxToggle.checked = result.ajaxEnabled !== false; // Default is true
-  });
+//   // Initialize toggles
+//   initToggle(cssToggle, "moodleCssEnabled", true, "darkModeToggle");
+//   initToggle(ajaxToggle, "ajaxEnabled");
+//   initToggle(darkModeToggle, "darkModeEnabled");
 
-  // Save the setting and refresh the current tab when AJAX checkbox is changed
-  ajaxToggle.addEventListener("change", function () {
-    chrome.storage.sync.set({ ajaxEnabled: ajaxToggle.checked }, () => {
-      refreshTabWithUrl(); // Refresh the current tab
-    });
-  });
-
-  // Save the setting and refresh the current tab when dark mode checkbox is changed
-  darkModeToggle.addEventListener("change", function () {
-    chrome.storage.sync.set({ darkModeEnabled: darkModeToggle.checked }, () => {
-      refreshTabWithUrl(); // Refresh the current tab
-    });
-  });
-});
+//   // Add event listeners
+//   handleToggleChange(cssToggle, "moodleCssEnabled", "darkModeToggle");
+//   handleToggleChange(ajaxToggle, "ajaxEnabled");
+//   handleToggleChange(darkModeToggle, "darkModeEnabled");
+// });
