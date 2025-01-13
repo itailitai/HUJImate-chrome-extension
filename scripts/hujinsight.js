@@ -2,21 +2,27 @@
 const getJwtTokenWithDelay = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(localStorage.getItem("jwtToken"));
+      resolve({
+        token: localStorage.getItem("jwtToken"),
+        name: JSON.parse(localStorage.getItem("user")).displayName,
+      });
     }, 2000); // 2-second delay
   });
 };
-
 const setupToken = async () => {
-  const token = await getJwtTokenWithDelay();
+  const { token, name } = await getJwtTokenWithDelay();
 
   if (token) {
     chrome.storage.local.get(["jwtToken"], (result) => {
       if (result.jwtToken !== token || !result.jwtToken) {
-        chrome.runtime.sendMessage({ action: "saveToken", token: token });
+        chrome.runtime.sendMessage({
+          action: "saveToken",
+          token: token,
+          name: name,
+        });
         // show success popup
         setTimeout(() => {
-          createSuccessModal();
+          createSuccessToast();
         }, 500);
       }
     });
@@ -33,94 +39,89 @@ if (document.readyState === "loading") {
 
 // Modal creation
 
-const createSuccessModal = () => {
-  // Create the modal container
-  const modal = document.createElement("div");
-  modal.id = "success-modal";
+const createSuccessToast = () => {
+  // Create the toast container
+  const toast = document.createElement("div");
+  toast.id = "success-toast";
 
-  modal.style.position = "fixed";
-  modal.style.zIndex = "1000";
-  modal.style.left = "0";
-  modal.style.top = "0";
-  modal.style.width = "100%";
-  modal.style.height = "100%";
-  modal.style.overflow = "auto";
-  modal.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-  modal.style.opacity = "0";
-  modal.style.transition = "opacity 0.5s";
+  toast.style.position = "fixed";
+  toast.style.zIndex = "5000001";
+  toast.style.bottom = "20px";
+  toast.style.left = "20px";
+  toast.style.width = "300px";
+  toast.style.padding = "15px 20px";
+  toast.style.backgroundColor = "#ffffff";
+  toast.style.color = "#333333";
+  toast.style.borderRadius = "8px";
+  toast.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
+  toast.style.opacity = "0";
+  toast.style.transition = "opacity 0.3s ease-in-out";
+  toast.style.fontFamily = "Arial, sans-serif";
+  toast.style.border = "1px solid #e0e0e0";
 
-  // Create the modal content
-  const modalContent = document.createElement("div");
-  modalContent.style.backgroundColor = "#fff";
-  modalContent.style.margin = "15% auto";
-  modalContent.style.padding = "20px";
-  modalContent.style.border = "1px solid #888";
-  modalContent.style.width = "80%";
-  modalContent.style.maxWidth = "500px";
-  modalContent.style.borderRadius = "10px";
-
-  modalContent.style.textAlign = "center";
-
-  // Create the close button
-  const closeButton = document.createElement("span");
-  closeButton.innerHTML = "&times;";
-  closeButton.style.color = "#aaa";
-  closeButton.style.float = "left";
-  closeButton.style.marginTop = "-10px";
-  closeButton.style.fontSize = "28px";
-  closeButton.style.fontWeight = "bold";
-  closeButton.style.cursor = "pointer";
-
-  closeButton.onmouseover = function () {
-    closeButton.style.color = "#000";
-  };
-
-  closeButton.onmouseout = function () {
-    closeButton.style.color = "#aaa";
-  };
-
-  closeButton.onclick = function () {
-    modal.style.display = "none";
-  };
+  // Create the success icon
+  const successIcon = document.createElement("div");
+  successIcon.innerHTML = "✅";
+  successIcon.style.fontSize = "24px";
+  successIcon.style.marginBottom = "10px";
 
   // Create the success message
-  const successMessage = document.createElement("h2");
+  const successMessage = document.createElement("div");
   successMessage.textContent = "מעולה!";
-  successMessage.style.color = "#4CAF50";
-  successMessage.style.marginBottom = "10px";
+  successMessage.style.fontWeight = "bold";
+  successMessage.style.marginBottom = "5px";
+  successMessage.style.fontSize = "18px";
 
-  const successDescription = document.createElement("p");
+  const successDescription = document.createElement("div");
   successDescription.textContent =
-    "התוסף חובר בהצלחה למשתמש HUJInsight שלך! ניתן לשתף ציונים מהמידע האישי.";
-  successDescription.style.color = "#333";
+    "התוסף חובר בהצלחה למשתמש StudentInsight שלך!";
+  successDescription.style.fontSize = "14px";
+  successDescription.style.color = "#666666";
 
-  // Append elements to the modal content
-  modalContent.appendChild(closeButton);
-  modalContent.appendChild(successMessage);
-  modalContent.appendChild(successDescription);
+  // Create the progress bar container
+  const progressBarContainer = document.createElement("div");
+  progressBarContainer.style.width = "100%";
+  progressBarContainer.style.height = "4px";
+  progressBarContainer.style.backgroundColor = "#e0e0e0";
+  progressBarContainer.style.position = "absolute";
+  progressBarContainer.style.bottom = "0";
+  progressBarContainer.style.left = "0";
+  progressBarContainer.style.borderRadius = "0 0 8px 8px";
+  progressBarContainer.style.overflow = "hidden";
 
-  // Append the modal content to the modal
-  modal.appendChild(modalContent);
+  // Create the progress bar
+  const progressBar = document.createElement("div");
+  progressBar.style.width = "100%";
+  progressBar.style.height = "100%";
+  progressBar.style.backgroundColor = "#4CAF50";
+  progressBar.style.transition = "width 5s linear";
 
-  // Append the modal to the body
-  document.body.appendChild(modal);
+  // Append elements to the toast
+  progressBarContainer.appendChild(progressBar);
+  toast.appendChild(successIcon);
+  toast.appendChild(successMessage);
+  toast.appendChild(successDescription);
+  toast.appendChild(progressBarContainer);
 
-  // Function to show the modal
-  const showModal = () => {
+  // Append the toast to the body
+  document.body.appendChild(toast);
+
+  // Function to show the toast
+  const showToast = () => {
+    toast.style.opacity = "1";
+
     setTimeout(() => {
-      modal.style.opacity = "1";
-    }, 250);
+      progressBar.style.width = "0";
+    }, 50);
+
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 5000);
   };
 
-  // Close the modal when clicking outside the modal content
-  window.onclick = function (event) {
-    if (event.target == modal) {
-      // remove modal
-      modal.style.display = "none";
-      modal.remove();
-    }
-  };
-
-  // Show the modal
-  showModal();
+  // Show the toast
+  showToast();
 };
