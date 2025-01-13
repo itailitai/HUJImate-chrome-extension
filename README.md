@@ -2,7 +2,7 @@
 
 StudentInsight is a browser extension that enables Hebrew University students to securely and anonymously share course statistics with their peers. This extension integrates with the university's grade portal (Orbit) to help students make informed decisions about their academic journey.
 
-![StudentInsight Extension Screenshot](https://studentinsight.co.il/extension-screenshot.png)
+![StudentInsight Extension Screenshot](https://i.imgur.com/oOtRbvb.jpeg)
 
 ## Features
 
