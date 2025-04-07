@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>התפלגות ציונים - מעבד נתונים</title>
+    <style>
+      :root {
+        --primary: #4caf50;
+        --background: #ffffff;
+        --text: #2c3e50;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        text-align: center;
+        direction: rtl;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .loading-container {
+        background: var(--background);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        width: 400px;
+        max-width: 90vw;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(76, 175, 80, 0.15);
+        animation: slideUp 0.8s ease-out forwards;
+      }
+
+      @keyframes slideUp {
+        0% {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .loading-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        position: relative;
+      }
+
+      .scanning-line {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background: var(--primary);
+        top: 50%;
+        transform: translateY(-50%);
+        animation: scan 2s infinite;
+      }
+
+      @keyframes scan {
+        0% {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+      }
+
+      .document-outline {
+        stroke-dasharray: 210;
+        stroke-dashoffset: 0;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1rem;
+      }
+
+      .message {
+        color: #64748b;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 1.5rem;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--primary);
+        width: 0%;
+        animation: progress 3s infinite;
+      }
+
+      @keyframes progress {
+        0% {
+          width: 0%;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+
+      .status-text {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-container">
+      <div class="loading-icon">
+        <svg viewBox="0 0 50 50">
+          <rect
+            class="document-outline"
+            x="10"
+            y="5"
+            width="30"
+            height="40"
+            fill="none"
+            stroke="#4caf50"
+            stroke-width="2"
+          />
+          <line
+            x1="15"
+            y1="15"
+            x2="35"
+            y2="15"
+            stroke="#4caf50"
+            stroke-width="2"
+          />
+          <line
+            x1="15"
+            y1="25"
+            x2="35"
+            y2="25"
+            stroke="#4caf50"
+            stroke-width="2"
+          />
+          <line
+            x1="15"
+            y1="35"
+            x2="35"
+            y2="35"
+            stroke="#4caf50"
+            stroke-width="2"
+          />
+          <div class="scanning-line"></div>
+        </svg>
+      </div>
+
+      <h2 class="title">מעבד נתונים...</h2>
+      <p class="message">
+        שרתי StudentInsight מבצעים זיהוי טקסט אופטי (OCR) על התמונות של
+        ההתפלגויות, ומחלצים משם את המידע בצורה אוטומטית.
+      </p>
+
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <p class="status-text">אנא המתן...</p>
+    </div>
+  </body>
+</html>

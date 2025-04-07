@@ -1,0 +1,7 @@
+html[dir="rtl"] .card .course-links a::before {
+  margin-left: 0 !important;
+}
+
+.card .course-links a::before {
+  width: 0 !important;
+}

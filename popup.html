@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet"
+    />
+    <title>StudentInsight Extension Settings</title>
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #8b5cf6, #d946ef);
+        --secondary-gradient: linear-gradient(135deg, #c084fc, #f0abfc);
+        --background-gradient: linear-gradient(135deg, #f5f3ff, #fce7f3);
+        --card-background: rgba(255, 255, 255, 0.8);
+        --text-color: #2d3748;
+        --border-radius: 16px;
+        --toggle-height: 24px;
+        --toggle-width: 48px;
+      }
+
+      .dark-mode {
+        /* Deeper, richer background gradient */
+        --background-gradient: linear-gradient(135deg, #0f172a, #1e1b4b);
+
+        /* Darker card with slight transparency for depth */
+        --card-background: rgba(30, 41, 59, 0.95);
+
+        /* Brighter text for better contrast */
+        --text-color: #f8fafc;
+
+        /* New dark mode specific variables */
+        --dark-surface: #1e293b;
+        --dark-hover: #334155;
+        --dark-border: rgba(148, 163, 184, 0.1);
+        --dark-secondary-text: #94a3b8;
+      }
+
+      .dark-mode .container {
+        border-color: var(--dark-border);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      }
+
+      .dark-mode .settings-group {
+        background: var(--dark-surface);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .dark-mode .toggle-container:hover {
+        background-color: var(--dark-hover);
+      }
+
+      .dark-mode .settings-title {
+        color: #a78bfa;
+      }
+
+      .dark-mode .toggle-label {
+        color: var(--text-color);
+      }
+
+      .dark-mode input[type="checkbox"] {
+        background-color: #475569;
+      }
+
+      .dark-mode input[type="checkbox"]:checked {
+        background: var(--primary-gradient);
+      }
+
+      .dark-mode .footer {
+        color: var(--dark-secondary-text);
+      }
+
+      .dark-mode .version {
+        color: #a78bfa;
+      }
+
+      .dark-mode .disclaimer {
+        background: var(--dark-surface);
+        border-color: #a78bfa;
+        color: var(--dark-secondary-text);
+      }
+
+      .dark-mode .auth-message {
+        color: #a78bfa;
+      }
+
+      .dark-mode .github-link {
+        background: linear-gradient(135deg, #475569, #64748b);
+      }
+
+      .dark-mode .github-link:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .dark-mode .disclaimer a {
+        color: #a78bfa;
+      }
+
+      body {
+        font-family: "Open Sans", serif;
+        background: var(--background-gradient);
+        margin: 0;
+        padding: 20px;
+        direction: rtl;
+        width: 320px;
+        box-sizing: border-box;
+        min-height: 400px;
+      }
+
+      .container {
+        background: var(--card-background);
+        border-radius: var(--border-radius);
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+      }
+
+      .logo-container {
+        background: var(--primary-gradient);
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      }
+
+      .logo {
+        width: 50px;
+        height: 50px;
+        filter: brightness(0) invert(1);
+      }
+
+      .auth-section {
+        padding: 20px;
+        margin-bottom: 12px;
+
+        text-align: center;
+      }
+
+      .auth-message {
+        font-size: 16px;
+        font-weight: 600;
+        color: #6d28d9;
+        margin-bottom: 16px;
+        line-height: 1.4;
+      }
+
+      .settings-group {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px rgba(139, 92, 246, 0.05);
+      }
+
+      .settings-title {
+        font-size: 18px;
+        color: #6d28d9;
+        margin-bottom: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+      }
+
+      .settings-title::before {
+        content: "⚙️";
+        margin-left: 8px;
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+        padding: 8px;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+      }
+
+      .toggle-container:hover {
+        background-color: #f5f3ff;
+      }
+
+      .toggle-label {
+        margin-right: 12px;
+        color: var(--text-color);
+        font-size: 14px;
+        flex-grow: 1;
+      }
+
+      input[type="checkbox"] {
+        appearance: none;
+        width: var(--toggle-width);
+        height: var(--toggle-height);
+        background-color: #e9d5ff;
+        border-radius: calc(var(--toggle-height) / 2);
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      input[type="checkbox"]:checked {
+        background: var(--primary-gradient);
+      }
+
+      input[type="checkbox"]::before {
+        content: "";
+        position: absolute;
+        width: calc(var(--toggle-height) - 4px);
+        height: calc(var(--toggle-height) - 4px);
+        border-radius: 50%;
+        background-color: white;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      input[type="checkbox"]:checked::before {
+        transform: translateX(calc(var(--toggle-width) - var(--toggle-height)));
+      }
+
+      .action-button {
+        /* Base styles */
+        background: var(--primary-gradient);
+        padding: 12px 28px;
+        border-radius: 999px; /* Fully rounded corners */
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px; /* Modern spacing between text and icon */
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+
+        /* Smooth transitions */
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+        /* Better default state */
+        position: relative;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+
+        /* Prevent text selection */
+        user-select: none;
+
+        /* Improve text rendering */
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+      }
+
+      .action-button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+      }
+
+      /* Focus state for accessibility */
+      .action-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4);
+      }
+
+      /* Better icon handling */
+      .action-button img {
+        width: 18px;
+        height: 18px;
+        margin: 0; /* Remove margin since we're using gap */
+        filter: brightness(0) invert(1);
+        /* Prevent icon from shrinking */
+        flex-shrink: 0;
+        /* Smooth icon transitions */
+        transition: transform 0.2s ease;
+      }
+
+      /* Optional: Animate icon on hover */
+      .action-button:hover img {
+        transform: translateX(2px);
+      }
+
+      /* Disabled state */
+      .action-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .github-link {
+        background: var(--secondary-gradient);
+        padding: 12px 24px;
+        border-radius: 30px;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        margin-bottom: 12px;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .github-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(192, 132, 252, 0.4);
+      }
+
+      .github-icon {
+        width: 20px;
+        height: 20px;
+        margin-left: 8px;
+        filter: brightness(0) invert(1);
+      }
+
+      .version {
+        font-size: 12px;
+        color: #6d28d9;
+        font-weight: 500;
+      }
+
+      .disclaimer {
+        background: #f5f3ff;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        color: #6d28d9;
+        text-align: center;
+        border: 1px dashed #c084fc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="disclaimer">
+      התוסף נוצר על ידי
+      <a target="_blank" href="https://www.linkedin.com/in/itailaitner/"
+        >Itai Laitner</a
+      >
+      ואינו קשור לאוניברסיטה העברית
+    </div>
+    <div class="container">
+      <div class="logo-container">
+        <img src="assets/hujinsight.png" alt="StudentInsight" class="logo" />
+      </div>
+
+      <div class="auth-section">
+        <!-- This section will be populated by JavaScript -->
+      </div>
+
+      <!-- <div class="settings-group">
+        <div class="settings-title">הגדרות Moodle</div>
+
+        <div class="toggle-container">
+          <label for="cssToggle" class="toggle-label">הפעל שינוי עיצובי</label>
+          <input type="checkbox" id="cssToggle" />
+        </div>
+
+        <div class="toggle-container">
+          <label for="darkModeToggle" class="toggle-label">מצב כהה (בטא)</label>
+          <input type="checkbox" id="darkModeToggle" />
+        </div>
+
+        <div class="toggle-container">
+          <label for="ajaxToggle" class="toggle-label"
+            >טעינת תוכן דינאמית</label
+          >
+          <input type="checkbox" id="ajaxToggle" />
+        </div>
+      </div> -->
+
+      <div class="footer">
+        <a
+          href="https://github.com/itailitai/HUJImate-chrome-extension"
+          target="_blank"
+          class="github-link"
+        >
+          <img
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABWRJREFUaEPtmWXIbUUUhp9rYXcXdmN3YKGCiNjYgd0iomKgiAH6w0JRLMRCUTFQf4iKotiF3YqKrdhiz/M557jPvjM7znf2Bxfu+nnOnrXWu2fNet9ZexJTuE2awvNnKoC4g9MD6wFbAqsCKwALAbMC/wA/A58BbwIvAw8BTwN/jrcCxrsDKwKHAXsC87ZM5ivgZuCKCKzl8v8eHxbAMsC5wM7ANENF/n/R38BtwKnA+219tQUwLXBy2PrTgBnbBqt5/tfwMs4CLgD+auq7DYAFgFuAzZs6H/I5z4cl+WWT9U0BLAE8CFg6E2EfAFsD79YFawLA5B8HFqlzNuL/Pw0vbSPgoyq/dQDmAZ4IpbP8iJNr6u4NYGPg29yCKgD+dw+wXWmxff0LYD7AQz0Kkw++Di11wYSzuwN37Bj5ZLK/qwAcEZK8LOHwBWAtYE5gJ+BoYPUhUTwPXBrW3wV8D7wWWupKCV9yzZWpGDkA8wNvxSTL684HTir86C4cDJwdW6tJvRKAfQN8F5+bKxKdLL0G8AtwCnAtIA/07JL4Qsox9bNc3KWB/3IAfPPuQMoOjIHL/80SOOK3Bj18ukCCM0QQZR9HxR1JxRXcseU/UgDs97axmTIA9gZuGrJk6pYdFLrdVZmH3DU7ohKkbykAUrrlkDPLxzLqws4ITs+scGzZnVcH4HVAkZazG4Jm2beL7KMm2rXCt4d8lSoAymB7b85+jB3onY4A2IGeDTs8c4V/D3M/frmEDgcur1is2HKbuzTF3AkVAQ4pnpMygOuA/TOLbXcLRxLrEsDiNfLB1msnHLMyAGXDhpnsXgzMvGaXmRd8W8aWc8rUZZvkACigfMspuz0wZdUBGyW2exMSpuf/E2CxHIAfgNkymQxs3SizTfi6MRzUvTIxbCSz5wD8EThApkzZnfEK2XHuY+7vA7bNBFL4OUQYs/IZUBEqoVP2KLDZRGQfkn8mgFgnE0smVqslATj2yGl/z8eiEwDAIYFyPTflMMc+0ZZ3wBPuLShnKwMydZemVH+uIsBjwKa5Hbi62GMTTtRJjlO6NMny9IoAij3JLFlCkphkljN1+dIFnT9qIJbNe8UukwiwTxgu2KWSAJaKDqoSuz4w5QG5K944EFn7jm12q/GxZFALH+YA+PvbQe8vW+PkwnAhOXEUs80Yx7Z4cTi8arEq85Y4wNCp+4BCSkFVNAmuTx7xj6eA4+KQdhwvfkwWXNRQphwP+PL6lgIgD3xcuJE9HEYrW8X26sW6r0OiF6fMUr88oV7v3YNzoOzhano7yfYtBgLeyGzjA/5zd2InxocWMlAH7RcGsDK1o78yiN6jannbsM+lzHmqQNcdYsuU+UeW1+UA2A2st7kLC24NY/Ddo9hzxp8iGtmzqofrztmqu9rGVAjWvpOOAauaC9lry7OYLcLWPxIlt9rIAUDP/ICRU7LFoI5hnLSVz1QVIMc2ctRkVgXAtnY/sE1hlckLQvPrizXsmVFmWFoOp5rYq4Cs3sQeiNK6OD/qr6ubjc4RADxZuuTvAtzRJHLFM1VirbjMpuAFyy6YtDoALpJ5BeEsVHN4dUy4VFxTmqq1weRhX7tmwecxeWdUWWsCwMV+F3Ari98HvBlZNipHy+mn0sixKq4HXdGWMxuI94HaT05NARjIHXBSvEEmqsSW+6+8xPlp7n6tIt4h1XFScdsAcL23NXvxOYGtnYUWTUJbv2EdOSAoT7T9RubET7X7e0M/Q3+lVCtJ6W5z7yVY100J6iVgtZik3UUmVybUlkwZWNsdKK+XXDzQfm5VpSrwmpjg9wjdTXL0+0Dtt7Cc0/ECaJJsp89MBdDp623g/F/fK+QxY10t7wAAAABJRU5ErkJggg=="
+            alt="GitHub"
+            class="github-icon"
+          />
+          GitHub
+        </a>
+        <div class="version">גרסה 1.1</div>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

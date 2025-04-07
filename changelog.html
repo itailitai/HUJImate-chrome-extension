@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Changelog - My Chrome Extension</title>
+    <style>
+      :root {
+        --primary-color: #0066cc;
+        --border-color: #e5e7eb;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --background: #ffffff;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 800px;
+        margin: 48px auto;
+        padding: 0 24px;
+        line-height: 1.6;
+        background: var(--background);
+        color: var(--text-primary);
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--text-primary);
+        font-size: 2.25rem;
+        font-weight: 600;
+        margin-bottom: 48px;
+      }
+
+      .version {
+        background: var(--background);
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+
+      .version h2 {
+        margin: 0 0 16px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .date {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: normal;
+      }
+
+      ul {
+        padding-left: 24px;
+        margin: 0;
+      }
+
+      li {
+        margin-bottom: 8px;
+        color: var(--text-primary);
+      }
+
+      li:last-child {
+        margin-bottom: 0;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          margin: 24px auto;
+        }
+
+        h1 {
+          font-size: 1.875rem;
+          margin-bottom: 32px;
+        }
+
+        .version {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>StudentInsight Extension Changelog</h1>
+    <div class="version">
+      <h2>Version 1.2.0 <span class="date">(2025-02-16)</span></h2>
+      <ul>
+        <li>Added support for new Moodle UI changes.</li>
+        <li>Improved performance when fetching course statistics.</li>
+        <li>Fixed issue with grade synchronization.</li>
+      </ul>
+    </div>
+
+    <div class="version">
+      <h2>Version 1.1.0 <span class="date">(2024-12-20)</span></h2>
+      <ul>
+        <li>Added a dark mode option.</li>
+        <li>Fixed minor bugs in the course tracker.</li>
+        <li>Improved error handling for API failures.</li>
+      </ul>
+    </div>
+
+    <div class="version">
+      <h2>Version 1.0.0 <span class="date">(2024-10-05)</span></h2>
+      <ul>
+        <li>Initial release of the Chrome extension.</li>
+        <li>Basic functionality for tracking grades and courses.</li>
+      </ul>
+    </div>
+  </body>
+</html>
