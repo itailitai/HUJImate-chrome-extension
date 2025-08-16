@@ -4,7 +4,7 @@
   "manifest_version": 3,
   "name": "StudentInsight",
   "description": "StudentInsight is a browser extension that lets students securely and anonymously share course statistics with their peers.",
-  "version": "1.1.0.3",
+  "version": "1.1.0.4",
   "permissions": ["storage", "tabs"],
   "icons": {
     "16": "icon16.png",
@@ -12,7 +12,8 @@
     "128": "icon128.png"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
   },
 
   "content_scripts": [
@@ -66,5 +67,11 @@
       ],
       "matches": ["https://orbitlive.huji.ac.il/*"]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "extension@hujinsight.com",
+      "update_url": "https://studentinsight.co.il/updates.json"
+    }
+  }
 }
