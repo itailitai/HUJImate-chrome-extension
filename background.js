@@ -48,6 +48,48 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "darkMode") {
     chrome.storage.sync.set({ darkMode: true });
   }
+
+  if (request.action === "pingBackend") {
+    fetch("https://api.studentinsight.co.il/stats/ping", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${request.token}`,
+      },
+    })
+      .then((response) => {
+        sendResponse({
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
+        });
+      })
+      .catch((error) => {
+        sendResponse({
+          ok: false,
+          error: error.message,
+        });
+      });
+    return true; // Keep the message channel open for async response
+  }
+
+  if (request.action === "sendDataToBackend") {
+    fetch("https://api.studentinsight.co.il/stats/extract-data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${request.token}`,
+      },
+      body: JSON.stringify(request.data),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        sendResponse({ ok: true, data: data });
+      })
+      .catch((error) => {
+        sendResponse({ ok: false, error: error.message });
+      });
+    return true; // Keep the message channel open for async response
+  }
 });
 
 function setLoggedInBadge() {
